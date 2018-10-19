@@ -1,0 +1,4 @@
+.idea*
+__pycache__*
+controller/__pycache__*
+controller/config.py

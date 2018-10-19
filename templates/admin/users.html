@@ -1,0 +1,77 @@
+<html>
+    <head>
+    </head>
+    <body>
+        {% include 'common/navigationBar.html' %}<br><br>
+
+        <span><h1 class="w3-center">Active Users</h1></span>
+        <table class="w3-centered w3-striped w3-table w3-border w3-bordered">
+            <tr>
+                <th width="33.33%">
+                    Name
+                </th>
+                <th width="33.33%">
+                    User ID
+                </th>
+                <th width="33.33%">
+                    Deactivate
+                </th>
+            </tr>
+            {% for i in range(users|length) %}
+                {% if users[i]['isActive'] %}
+                    <tr>
+                        <td width="33.33%">
+                            {{ users[i]['userID'] }}
+                        </td>
+                        <td width="33.33%">
+                            {{ users[i]['name'] }}
+                        </td>
+                        <td width="33.33%">
+                            <input type="checkbox" name="deactivate">
+                        </td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+            <tr>
+                <td colspan="3">
+                    <button class="w3-btn w3-green w3-center">Deactivate Selected Users</button>
+                </td>
+            </tr>
+        </table><br>
+
+        <span><h1 class="w3-center">In Active Users</h1></span>
+        <table class="w3-centered w3-striped w3-table w3-border w3-bordered">
+            <tr>
+                <th width="33.33%">
+                    Name
+                </th>
+                <th width="33.33%">
+                    User ID
+                </th>
+                <th width="33.33%">
+                    Activate
+                </th>
+            </tr>
+            {% for i in range(users|length) %}
+                {% if users[i]['isActive'] != true %}
+                    <tr>
+                        <td width="33.33%">
+                            {{ users[i]['userID'] }}
+                        </td>
+                        <td width="33.33%">
+                            {{ users[i]['name'] }}
+                        </td>
+                        <td width="33.33%">
+                            <input type="checkbox" name="activate">
+                        </td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+            <tr>
+                <td colspan="3">
+                    <button class="w3-btn w3-green w3-center">Activate Selected Users</button>
+                </td>
+            </tr>
+        </table>
+    </body>
+</html>
