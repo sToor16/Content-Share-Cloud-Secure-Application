@@ -47,12 +47,13 @@ def login():
                     hasPw = result[0]['password']
                     if bcrypt.check_password_hash(hasPw, password):
                         if result[0]['isActive'] == 1:
+                            session['userID'] = user_id
                             session['isActive'] = 'true'
                             if result[0]['isAdmin'] == 1:
                                 session['isAdmin'] = 'true'
                                 return redirect('/admin/users')
                             else:
-                                return redirect('/groups')
+                                return redirect('groups')
                         else:
                             print("user not active")
                     else:

@@ -1,13 +1,37 @@
-from flask import Blueprint, render_template, session, redirect
+from flask import Blueprint, render_template, session, redirect, request
+from controller import connection
 
 nonAdmin = Blueprint('nonAdmin', __name__, template_folder='templates')
 
 @nonAdmin.route('/')
-@nonAdmin.route('/groups')
 def hello_world():
+    return "Welcome to my Secure Website"
+
+@nonAdmin.route('/groups')
+def groups():
     if 'isAdmin' in session:
         return "Bad Page"
+
     if 'isActive' in session:
-        return render_template('nonAdmin/groups.html')
+        return render_template('/nonAdmin/groups.html')
     else:
         return redirect('login')
+
+@nonAdmin.route('/createGroup', methods=['GET','POST'])
+def createGroup():
+    name = request.form['name']
+    owner = session['userID']
+
+    try:
+        with connection.cursor() as cursor:
+
+            sql = "INSERT INTO `groups` (`owner`, `name`) VALUES (%s, %s)"
+            cursor.execute(sql,(owner, name))
+            connection.commit()
+    finally:
+        print("connection closed");
+        # connection.close()
+
+
+    return redirect('/groups')
+

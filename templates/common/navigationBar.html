@@ -10,17 +10,17 @@
             <div class="w3-top">
               <div class="w3-bar w3-black w3-card">
 
-                {% if session['isAdmin'] == 'true' %}
-                    <a href="../admin/users.html" class="w3-bar-item w3-button w3-padding-large">Users</a>
-                    <a href="../admin/groups.html" class="w3-bar-item w3-button w3-padding-large">Groups</a>
-                {% else %}
-                    <a href="/groups.html" class="w3-bar-item w3-button w3-padding-large">Groups</a>
-                {% endif %}
-
                 {% if session['isActive'] == 'true' %}
+                    {% if session['isAdmin'] == 'true' %}
+                        <a href="../admin/users.html" class="w3-bar-item w3-button w3-padding-large">Users</a>
+                        <a href="../admin/groups.html" class="w3-bar-item w3-button w3-padding-large">Groups</a>
+                    {% else %}
+                        <a href="/groups" class="w3-bar-item w3-button w3-padding-large">Groups</a>
+                    {% endif %}
                     <a href="/logout" class="w3-bar-item w3-button w3-padding-large">LOGOUT</a>
                 {% else %}
                     <a href="/login" class="w3-bar-item w3-button w3-padding-large">LOGIN</a>
+                    <a href="/register" class="w3-bar-item w3-button w3-padding-large">Register</a>
                 {% endif %}
 
               </div>
