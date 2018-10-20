@@ -26,7 +26,7 @@ def adminGroups():
         try:
             with connection.cursor() as cursor:
                 isAdmin = 0;
-                sql = "SELECT idgroup, owner, name, isActive FROM `groups`"
+                sql = "SELECT * FROM `groups`"
                 cursor.execute(sql)
                 result = cursor.fetchall()
 
@@ -85,11 +85,18 @@ def deactivateGroup():
 @admin.route('/admin/activateGroup', methods=['GET', 'POST'])
 def activateGroup():
     idgroup = request.form['activateGroupID']
+    groupOwner = request.form['groupOwner']
+
+    print("idgroup: " + idgroup)
+    print("groupOwner: " + groupOwner)
     try:
         with connection.cursor() as cursor:
             sql = "UPDATE `groups` SET isActive = '%s' WHERE idgroup=%s"
             cursor.execute(sql, (1, idgroup))
-            result = cursor.fetchall()
+            connection.commit()
+
+            sql = "INSERT INTO group_members VALUES (%s,%s)"
+            cursor.execute(sql,(idgroup,groupOwner))
             connection.commit()
     finally:
         print("connection closed commented")

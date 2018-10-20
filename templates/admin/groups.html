@@ -62,6 +62,7 @@
                         </td>
                         <td width="33.33%">
                             <form method="post" action="/admin/activateGroup">
+                                <input hidden name="groupOwner" value="{{ groups[i]['owner'] }}">
                                 <button name="activateGroupID" type="submit" value="{{ groups[i]['idgroup'] }}" class="w3-btn w3-green w3-center">
                                     Activate Group
                                 </button>
