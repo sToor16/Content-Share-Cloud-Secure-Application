@@ -4,6 +4,73 @@
     </head>
     <body>
         {% include 'common/navigationBar.html' %}<br><br>
-        <h1>Admin Groups</h1>
+{#        <div>#}
+            <h1 class="w3-center">Active Groups</h1>
+            <table class="w3-centered w3-striped w3-table w3-border w3-bordered">
+                <tr>
+                    <th width="33.33%">
+                        Group Name
+                    </th>
+                    <th width="33.33%">
+                        Group Owner
+                    </th>
+                    <th width="33.33%">
+                    </th>
+                </tr>
+                {% for i in range(groups|length) %}
+                    {% if groups[i]['isActive'] %}
+                        <tr>
+                            <td width="33.33%">
+                                {{ groups[i]['owner'] }}
+                            </td>
+                            <td width="33.33%">
+                                {{ groups[i]['name'] }}
+                            </td>
+                            <td width="33.33%">
+                                <form method="post" action="/admin/deactivateGroup">
+                                    <button name="deactivateGroupID" type="submit" value="{{ groups[i]['idgroup'] }}" class="w3-btn w3-green w3-center">
+                                        Deactivate Group
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            </table>
+{#        </div>#}
+        <div>
+            <h1 class="w3-center">Inactive Groups</h1>
+             <table class="w3-centered w3-striped w3-table w3-border w3-bordered">
+                <tr>
+                    <th width="33.33%">
+                        Group Name
+                    </th>
+                    <th width="33.33%">
+                        Group Owner
+                    </th>
+                    <th width="33.33%">
+                    </th>
+                </tr>
+                {% for i in range(groups|length) %}
+                    {% if groups[i]['isActive'] == 0 %}
+                    <tr>
+                        <td width="33.33%">
+                            {{ groups[i]['owner'] }}
+                        </td>
+                        <td width="33.33%">
+                            {{ groups[i]['name'] }}
+                        </td>
+                        <td width="33.33%">
+                            <form method="post" action="/admin/activateGroup">
+                                <button name="activateGroupID" type="submit" value="{{ groups[i]['idgroup'] }}" class="w3-btn w3-green w3-center">
+                                    Activate Group
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endif %}
+                {% endfor %}
+             </table>
+        </div>
     </body>
 </html>

@@ -23,7 +23,18 @@ def adminUsers():
 @admin.route('/admin/groups')
 def adminGroups():
     if 'isAdmin' in session:
-        return render_template('admin/groups.html');
+        try:
+            with connection.cursor() as cursor:
+                isAdmin = 0;
+                sql = "SELECT idgroup, owner, name, isActive FROM `groups`"
+                cursor.execute(sql)
+                result = cursor.fetchall()
+
+                print(result)
+        finally:
+            print("connection closed commented")
+            # connection.close()
+        return render_template('admin/groups.html', groups = result);
     else:
         return "NO ACCESS SORRY"
 
@@ -54,3 +65,32 @@ def activateUser():
         print("connection closed commented")
         # connection.close()
     return redirect('/admin/users')
+
+@admin.route('/admin/deactivateGroup', methods = ['GET', 'POST'])
+def deactivateGroup():
+    idgroup = request.form['deactivateGroupID']
+    try:
+        with connection.cursor() as cursor:
+            sql = "UPDATE `groups` SET isActive = '%s' WHERE idgroup=%s"
+            cursor.execute(sql, (0, idgroup))
+            result = cursor.fetchall()
+            connection.commit()
+    finally:
+        print("connection closed commented")
+        # connection.close()
+
+    return redirect('/admin/groups')
+
+
+@admin.route('/admin/activateGroup', methods=['GET', 'POST'])
+def activateGroup():
+    idgroup = request.form['activateGroupID']
+    try:
+        with connection.cursor() as cursor:
+            sql = "UPDATE `groups` SET isActive = '%s' WHERE idgroup=%s"
+            cursor.execute(sql, (1, idgroup))
+            result = cursor.fetchall()
+            connection.commit()
+    finally:
+        print("connection closed commented")
+    return redirect('/admin/groups')

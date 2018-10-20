@@ -12,8 +12,8 @@
 
                 {% if session['isActive'] == 'true' %}
                     {% if session['isAdmin'] == 'true' %}
-                        <a href="../admin/users.html" class="w3-bar-item w3-button w3-padding-large">Users</a>
-                        <a href="../admin/groups.html" class="w3-bar-item w3-button w3-padding-large">Groups</a>
+                        <a href="/admin/users" class="w3-bar-item w3-button w3-padding-large">Users</a>
+                        <a href="/admin/groups" class="w3-bar-item w3-button w3-padding-large">Groups</a>
                     {% else %}
                         <a href="/groups" class="w3-bar-item w3-button w3-padding-large">Groups</a>
                     {% endif %}
