@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, session
+from flask import Blueprint, render_template, session, redirect, request
 from controller import connection
 
 admin = Blueprint('admin', __name__, template_folder='templates')
@@ -26,3 +26,10 @@ def adminGroups():
         return render_template('admin/groups.html');
     else:
         return "NO ACCESS SORRY"
+
+@admin.route('/admin/deactivateUser', methods = ['GET','POST'])
+def deactivateUser():
+    print("reached")
+    user_id = request.form['button4']
+    print(user_id)
+    return redirect('/admin/users')
