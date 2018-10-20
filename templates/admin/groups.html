@@ -21,10 +21,10 @@
                     {% if groups[i]['isActive'] %}
                         <tr>
                             <td width="33.33%">
-                                {{ groups[i]['owner'] }}
+                                {{ groups[i]['name'] }}
                             </td>
                             <td width="33.33%">
-                                {{ groups[i]['name'] }}
+                                {{ groups[i]['owner'] }}
                             </td>
                             <td width="33.33%">
                                 <form method="post" action="/admin/deactivateGroup">
@@ -55,10 +55,10 @@
                     {% if groups[i]['isActive'] == 0 %}
                     <tr>
                         <td width="33.33%">
-                            {{ groups[i]['owner'] }}
+                            {{ groups[i]['name'] }}
                         </td>
                         <td width="33.33%">
-                            {{ groups[i]['name'] }}
+                            {{ groups[i]['owner'] }}
                         </td>
                         <td width="33.33%">
                             <form method="post" action="/admin/activateGroup">
