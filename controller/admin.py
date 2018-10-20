@@ -29,7 +29,28 @@ def adminGroups():
 
 @admin.route('/admin/deactivateUser', methods = ['GET','POST'])
 def deactivateUser():
-    print("reached")
-    user_id = request.form['button4']
-    print(user_id)
+    user_id = request.form['deactivateUserID']
+    try:
+        with connection.cursor() as cursor:
+            sql = "UPDATE `Users` SET isActive = '%s' WHERE userID=%s"
+            cursor.execute(sql, (0,user_id))
+            result = cursor.fetchall()
+            connection.commit()
+    finally:
+        print("connection closed commented")
+        # connection.close()
+    return redirect('/admin/users')
+
+@admin.route('/admin/activateUser', methods = ['GET','POST'])
+def activateUser():
+    user_id = request.form['activateUserID']
+    try:
+        with connection.cursor() as cursor:
+            sql = "UPDATE `Users` SET isActive = '%s' WHERE userID=%s"
+            cursor.execute(sql, (1,user_id))
+            result = cursor.fetchall()
+            connection.commit()
+    finally:
+        print("connection closed commented")
+        # connection.close()
     return redirect('/admin/users')

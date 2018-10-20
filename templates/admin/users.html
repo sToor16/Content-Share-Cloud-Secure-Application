@@ -30,7 +30,7 @@
                             </td>
                             <td width="33.33%">
                                 <form method="post" action="/admin/deactivateUser">
-                                    <button name="button4" type="submit" value="{{ users[i]['userID'] }}" class="w3-btn w3-green w3-center">
+                                    <button name="deactivateUserID" type="submit" value="{{ users[i]['userID'] }}" class="w3-btn w3-green w3-center">
                                         Deactivate User
                                     </button>
                                 </form>
@@ -63,16 +63,15 @@
                             {{ users[i]['name'] }}
                         </td>
                         <td width="33.33%">
-                            <input type="checkbox" name="activate">
+                            <form method="post" action="/admin/activateUser">
+                                <button name="activateUserID" type="submit" value="{{ users[i]['userID'] }}" class="w3-btn w3-green w3-center">
+                                    Activate User
+                                </button>
+                            </form>
                         </td>
                     </tr>
                 {% endif %}
             {% endfor %}
-            <tr>
-                <td colspan="3">
-                    <button class="w3-btn w3-green w3-center">Activate Selected Users</button>
-                </td>
-            </tr>
         </table>
     </body>
 </html>
