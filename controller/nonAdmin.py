@@ -12,8 +12,31 @@ def groups():
     if 'isAdmin' in session:
         return "Bad Page"
 
+    isActive = 1
+
     if 'isActive' in session:
-        return render_template('/nonAdmin/groups.html')
+        try:
+            with connection.cursor() as cursor:
+
+                sql = "SELECT group_members.idgroup, groups.owner, groups.name " \
+                      "FROM group_members " \
+                      "INNER JOIN groups ON group_members.idgroup = groups.idgroup " \
+                      "WHERE group_members.group_owner = %s"
+                cursor.execute(sql,(session['userID']))
+                joined = cursor.fetchall();
+
+                sql = "SELECT group_members.idgroup, groups.owner, groups.name " \
+                      "FROM group_members " \
+                      "INNER JOIN groups ON group_members.idgroup != groups.idgroup " \
+                      "WHERE group_members.group_owner = %s"
+                cursor.execute(sql, (session['userID']))
+                unjoined = cursor.fetchall();
+
+        finally:
+            print("connection closed");
+            # connection.close()
+
+        return render_template('/nonAdmin/groups.html', joinedGroups = joined, unjoinedGroups = unjoined)
     else:
         return redirect('login')
 
@@ -33,5 +56,10 @@ def createGroup():
         # connection.close()
 
 
+    return redirect('/groups')
+
+@nonAdmin.route('/joinGroup', methods=['GET', 'POST'])
+def joinGroup():
+    print("reached")
     return redirect('/groups')
 

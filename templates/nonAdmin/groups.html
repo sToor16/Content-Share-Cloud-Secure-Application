@@ -13,9 +13,61 @@
         </div>
         <div>
             <h3><span>joined Groups</span></h3>
+            <table class="w3-centered w3-striped w3-table w3-border w3-bordered">
+                <tr>
+                    <th width="33.33%">
+                        Group Name
+                    </th>
+                    <th width="33.33%">
+                        Group Owner
+                    </th>
+                    <th width="33.33%">
+
+                    </th>
+                </tr>
+                {% for i in range(joinedGroups|length) %}
+                    <tr>
+                        <td width="33.33%">
+                            {{ joinedGroups[i]['name'] }}
+                        </td>
+                        <td width="33.33%">
+                            {{ joinedGroups[i]['owner'] }}
+                        </td>
+                        <td width="33.33%">
+                            <button class="w3-button w3-green">Open</button>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
         </div>
         <div>
             <h3><span>Unjoined Groups</span></h3>
+            <table class="w3-centered w3-striped w3-table w3-border w3-bordered">
+                <tr>
+                    <th width="33.33%">
+                        Group Name
+                    </th>
+                    <th width="33.33%">
+                        Group Owner
+                    </th>
+                    <th width="33.33%">
+
+                    </th>
+                </tr>
+                {% for i in range(unjoinedGroups|length) %}
+                    <tr>
+                        <td width="33.33%">
+                            {{ unjoinedGroups[i]['name'] }}
+                        </td>
+                        <td width="33.33%">
+                            {{ unjoinedGroups[i]['owner'] }}
+                        </td>
+                        <td width="33.33%">
+                            <button class="w3-button w3-green">Join</button>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
         </div>
     </body>
 </html>
