@@ -30,11 +30,18 @@ def adminGroups():
                 cursor.execute(sql)
                 result = cursor.fetchall()
 
-                print(result)
+                sql = "SELECT groups.idgroup, groups.name, group_members.member, group_members.id " \
+                      "FROM group_members " \
+                      "INNER JOIN groups ON " \
+                      "group_members.idgroup = groups.idgroup " \
+                      "WHERE group_members.accepted = %s"
+                cursor.execute(sql, (0))
+                acceptRequests = cursor.fetchall()
+                print(acceptRequests)
         finally:
             print("connection closed commented")
             # connection.close()
-        return render_template('admin/groups.html', groups = result);
+        return render_template('admin/groups.html', groups = result, acceptRequests = acceptRequests);
     else:
         return "NO ACCESS SORRY"
 
@@ -100,4 +107,19 @@ def activateGroup():
             connection.commit()
     finally:
         print("connection closed commented")
+    return redirect('/admin/groups')
+
+@admin.route('/admin/acceptGroupJoin', methods=['GET','POST'])
+def acceptGroupJoin():
+    idRequest = request.form['requestID']
+
+    try:
+        with connection.cursor() as cursor:
+            sql = "UPDATE group_members SET accepted = '%s' " \
+                  "WHERE id = %s"
+            cursor.execute(sql, (1, idRequest))
+            connection.commit()
+    finally:
+        print("connection closed commented")
+
     return redirect('/admin/groups')

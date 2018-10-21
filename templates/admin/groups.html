@@ -4,7 +4,7 @@
     </head>
     <body>
         {% include 'common/navigationBar.html' %}<br><br>
-{#        <div>#}
+        <div>
             <h1 class="w3-center">Active Groups</h1>
             <table class="w3-centered w3-striped w3-table w3-border w3-bordered">
                 <tr>
@@ -37,7 +37,7 @@
                     {% endif %}
                 {% endfor %}
             </table>
-{#        </div>#}
+        </div>
         <div>
             <h1 class="w3-center">Inactive Groups</h1>
              <table class="w3-centered w3-striped w3-table w3-border w3-bordered">
@@ -72,6 +72,38 @@
                     {% endif %}
                 {% endfor %}
              </table>
+        </div>
+        <div>
+            <h1 class="w3-center">Join Requests</h1>
+            <table class="w3-centered w3-striped w3-table w3-border w3-bordered">
+                <tr>
+                    <th width="33.33%">
+                        Group Name
+                    </th>
+                    <th width="33.33%">
+                        Requested By
+                    </th>
+                    <th width="33.33%">
+                    </th>
+                </tr>
+                {% for i in range(acceptRequests|length) %}
+                    <tr>
+                        <td width="33.33%">
+                            {{ acceptRequests[i]['name'] }}
+                        </td>
+                        <td width="33.33%">
+                            {{ acceptRequests[i]['member'] }}
+                        </td>
+                        <td width="33.33%">
+                            <form method="post" action="/admin/acceptGroupJoin">
+                                <button name="requestID" type="submit" value="{{ acceptRequests[i]['id'] }}" class="w3-btn w3-green w3-center">
+                                    Accept Join Group Request
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
         </div>
     </body>
 </html>

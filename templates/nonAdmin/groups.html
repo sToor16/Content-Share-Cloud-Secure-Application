@@ -63,7 +63,22 @@
                             {{ unjoinedGroups[i]['owner'] }}
                         </td>
                         <td width="33.33%">
-                            <button class="w3-button w3-green">Join</button>
+                            <form method="post" action="/joinGroup">
+                                <button name="groupID" value="{{ unjoinedGroups[i]['idgroup'] }}" class="w3-button w3-green">Join</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+                {% for i in range(requestedGroups|length) %}
+                    <tr>
+                        <td width="33.33%">
+                            {{ requestedGroups[i]['name'] }}
+                        </td>
+                        <td width="33.33%">
+                            {{ requestedGroups[i]['owner'] }}
+                        </td>
+                        <td width="33.33%">
+                            <span>Already Requested</span>
                         </td>
                     </tr>
                 {% endfor %}
