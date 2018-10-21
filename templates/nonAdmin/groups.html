@@ -34,7 +34,9 @@
                             {{ joinedGroups[i]['owner'] }}
                         </td>
                         <td width="33.33%">
-                            <button class="w3-button w3-green">Open</button>
+                            <form method="post" action="/selectedGroup">
+                                <button name="idgroup" value="{{ joinedGroups[i]['idgroup'] }}" class="w3-button w3-green">Open</button>
+                            </form>
                         </td>
                     </tr>
                 {% endfor %}

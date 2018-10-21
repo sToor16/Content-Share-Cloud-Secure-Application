@@ -102,8 +102,8 @@ def activateGroup():
             cursor.execute(sql, (1, idgroup))
             connection.commit()
 
-            sql = "INSERT INTO group_members VALUES (%s,%s)"
-            cursor.execute(sql,(idgroup,groupOwner))
+            sql = "INSERT INTO group_members (idgroup, member, accepted) VALUES (%s,%s,%s)"
+            cursor.execute(sql,(idgroup,groupOwner,1))
             connection.commit()
     finally:
         print("connection closed commented")

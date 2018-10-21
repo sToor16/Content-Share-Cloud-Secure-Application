@@ -18,7 +18,7 @@ def groups():
         try:
             with connection.cursor() as cursor:
 
-                sql = "SELECT groups.name, groups.owner " \
+                sql = "SELECT groups.name, groups.owner, groups.idgroup " \
                       "FROM group_members " \
                       "INNER JOIN groups ON group_members.idgroup = groups.idgroup " \
                       "WHERE group_members.member = %s AND " \
@@ -45,8 +45,6 @@ def groups():
                       " groups.isActive = %s"
                 cursor.execute(sql, (session['userID'], 0, 1))
                 requested = cursor.fetchall();
-
-                print(requested)
 
         finally:
             print("connection closed");
@@ -88,4 +86,10 @@ def joinGroup():
         print("connection closed");
         # connection.close()
 
+    return redirect('/groups')
+
+@nonAdmin.route('/selectedGroup', methods=['GET','POST'])
+def selectedGroup():
+    idgroup = request.form['idgroup']
+    print(idgroup)
     return redirect('/groups')
