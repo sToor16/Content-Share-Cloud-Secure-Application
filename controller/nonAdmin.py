@@ -90,6 +90,20 @@ def joinGroup():
 
 @nonAdmin.route('/selectedGroup', methods=['GET','POST'])
 def selectedGroup():
+    if 'isAdmin' in session:
+        return "NO ACCESS"
+
     idgroup = request.form['idgroup']
-    print(idgroup)
-    return redirect('/groups')
+
+    try:
+        with connection.cursor() as cursor:
+
+            sql = "SELECT * FROM groups WHERE idgroup = %s"
+            cursor.execute(sql,(idgroup))
+            result = cursor.fetchall();
+            print(result)
+    finally:
+        print("connection closed");
+        # connection.close()
+
+    return render_template('nonAdmin/selected_group.html', groupData = result);
