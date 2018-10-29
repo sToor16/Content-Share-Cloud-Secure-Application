@@ -3,10 +3,6 @@ from controller import connection
 
 nonAdmin = Blueprint('nonAdmin', __name__, template_folder='templates')
 
-@nonAdmin.route('/')
-def hello_world():
-    return "Welcome to my Secure Website"
-
 @nonAdmin.route('/groups')
 def groups():
     if 'isAdmin' in session:
@@ -87,23 +83,3 @@ def joinGroup():
         # connection.close()
 
     return redirect('/groups')
-
-@nonAdmin.route('/selectedGroup', methods=['GET','POST'])
-def selectedGroup():
-    if 'isAdmin' in session:
-        return "NO ACCESS"
-
-    idgroup = request.form['idgroup']
-
-    try:
-        with connection.cursor() as cursor:
-
-            sql = "SELECT * FROM groups WHERE idgroup = %s"
-            cursor.execute(sql,(idgroup))
-            result = cursor.fetchall();
-            print(result)
-    finally:
-        print("connection closed");
-        # connection.close()
-
-    return render_template('nonAdmin/selected_group.html', groupData = result);

@@ -1,0 +1,17 @@
+<html>
+    <head>
+    </head>
+    <body>
+        {% include 'common/navigationBar.html' %}<br><br>
+        <h3>Group Name</h3>
+        {{ groupData[0]['name'] }}
+        <h3>Group Owner</h3>
+        {{ groupData[0]['owner'] }}<br>
+
+        <form method="post" action="/uploadNewFile">
+            <input hidden name="idgroup" value="{{ groupData[0]['idgroup'] }}">
+            <input type="submit" class="w3-button w3-green" value="New Upload">
+        </form>
+
+    </body>
+</html>

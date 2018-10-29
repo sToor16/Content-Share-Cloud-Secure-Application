@@ -1,0 +1,37 @@
+<html>
+    <head>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="http://malsup.github.com/jquery.form.js"></script>
+    </head>
+    <body>
+        {% include 'common/navigationBar.html' %}<br><br>
+
+        <form id="form1" enctype="multipart/form-data">
+            <input hidden value="{{ idgroup }}" name="idgroup">
+            <input type="file" name="file"><br>
+            <input name="name"><br>
+            <input name="description">
+
+        </form>
+
+        <form id="form2" method="post" action="/selectedGroup">
+            <input hidden value="{{ idgroup }}" name="idgroup">
+            <input hidden type="submit">
+        </form>
+
+        <button onclick="submitForms()" class="w3-button w3-green">Upload</button>
+
+        <script>
+            function submitForms(){
+                 $("#form1").ajaxSubmit({
+                    url: 'uploadFile',
+                    type: 'post'
+                 })
+                submitSecond();
+            }
+            function submitSecond() {
+                document.getElementById('form2').submit();
+            }
+        </script>
+    </body>
+</html>
