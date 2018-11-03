@@ -91,13 +91,11 @@ def selectedGroup():
         with connection.cursor() as cursor:
 
             sql = "SELECT groups.owner, groups.name, group_items.* FROM groups " \
-                  "INNER JOIN group_items " \
+                  "LEFT JOIN group_items " \
                   "ON groups.idgroup = group_items.idgroup " \
                   "WHERE groups.idgroup = %s"
             cursor.execute(sql,(idgroup))
             result = cursor.fetchall();
-
-            print(result)
 
     finally:
         print("connection closed");

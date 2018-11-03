@@ -16,16 +16,20 @@
         <div>
             {% for i in range(groupData|length) %}
 
-                <span>uploader_id: </span>{{ groupData[i]['uploader_id'] }}<br>
-                <span>description: </span>{{ groupData[i]['description'] }}<br>
-                <span>Download URL: </span>{{ groupData[i]['file_url'] }}<br>
-                <span>Name: </span>{{ groupData[i]['group_items.name'] }}<br>
-                <span>Description: </span>{{ groupData[i]['description'] }}<br>
-                <span>Date Created: </span>{{ groupData[i]['date'] }}<br>
-                <span>Time Created: </span>{{ groupData[i]['time'] }}<br>
-                <span>Date Last Accessed: </span>{{ groupData[i]['date_access'] }}<br>
-                <span>Time Last Accessed: </span>{{ groupData[i]['time_access'] }}<br>
-                <br><br><br>
+                {% if groupData[i]['uploader_id'] != None %}
+
+                    <span>uploader_id: </span>{{ groupData[i]['uploader_id'] }}<br>
+                    <span>description: </span>{{ groupData[i]['description'] }}<br>
+                    <span>Download URL: </span>{{ groupData[i]['file_url'] }}<br>
+                    <span>Name: </span>{{ groupData[i]['group_items.name'] }}<br>
+                    <span>Description: </span>{{ groupData[i]['description'] }}<br>
+                    <span>Date Created: </span>{{ groupData[i]['date'] }}<br>
+                    <span>Time Created: </span>{{ groupData[i]['time'] }}<br>
+                    <span>Date Last Accessed: </span>{{ groupData[i]['date_access'] }}<br>
+                    <span>Time Last Accessed: </span>{{ groupData[i]['time_access'] }}<br>
+                    <br><br><br>
+
+                {% endif %}
             {% endfor %}
         </div>
 
