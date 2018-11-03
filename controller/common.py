@@ -85,17 +85,20 @@ def logout():
 @common.route('/selectedGroup', methods=['GET','POST'])
 def selectedGroup():
 
-    if 'isAdmin' in session:
-        return "NO ACCESS"
-
     idgroup = request.form['idgroup']
 
     try:
         with connection.cursor() as cursor:
 
-            sql = "SELECT * FROM groups WHERE idgroup = %s"
+            sql = "SELECT groups.owner, groups.name, group_items.* FROM groups " \
+                  "INNER JOIN group_items " \
+                  "ON groups.idgroup = group_items.idgroup " \
+                  "WHERE groups.idgroup = %s"
             cursor.execute(sql,(idgroup))
             result = cursor.fetchall();
+
+            print(result)
+
     finally:
         print("connection closed");
         # connection.close()
@@ -135,6 +138,7 @@ def uploadFile():
                   "(%s, %s, %s, %s, %s, %s, %s, %s, %s)"
             cursor.execute(sql, (idgroup, full_file_url, session['userID'], name,
                                  description, date, time, date, time))
+
 
         connection.commit()
     finally:
