@@ -1,9 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, session
 from controller import connection, bcrypt
 import datetime
-from controller.dbAccess import insertQuery, fetchQuery
-
-from google.cloud import storage
+from controller.externalAccess import insertQuery, fetchQuery, upload_blob
 
 common = Blueprint('common', __name__, template_folder='templates')
 
@@ -35,7 +33,6 @@ def login():
         params['password'] = request.form['password']
 
         sql = "SELECT * FROM `Users` WHERE userID=%s"
-
         result = fetchQuery(sql, params)
 
         if (len(result) == 0):
@@ -61,11 +58,9 @@ def login():
 
 @common.route('/logout', methods=['GET'])
 def logout():
-    print(session)
     session.pop('isActive',None)
     session.pop('isAdmin',None)
     session.pop('name',None)
-    print(session)
 
     return redirect('/login')
 
@@ -99,7 +94,6 @@ def uploadPage():
 
 @common.route('/uploadFile', methods=['POST'])
 def uploadFile():
-    print(request.form)
     idgroup = request.form['idgroup']
     description = request.form['description']
     name = request.form['name']
@@ -137,32 +131,22 @@ def uploadFile():
 
 @common.route('/downloadFile', methods=['POST'])
 def downloadFile():
+    idgroup_items = request.form['idgroup_items']
 
-    bucket_name = 'secure-flask-app-bucket'
-    source_file_name = '7/toor_masters_unofficial_transcript.pdf'
-    destination_blob_name = source_file_name
+    now = datetime.datetime.now()
+    time = now.time()
+    date = now.date()
 
-    download_blob(bucket_name, source_file_name, destination_blob_name)
+    try:
+        with connection.cursor() as cursor:
+            sql = "UPDATE group_items SET " \
+                  "date_access= %s, time_access = %s " \
+                  "WHERE idgroup_items = %s"
+            cursor.execute(sql,(date, time, idgroup_items))
+        connection.commit()
+
+    finally:
+        print("connection closed");
+        # connection.close()
+
     return "success"
-
-def upload_blob(bucket_name, source_file_name, destination_blob_name):
-    storage_client = storage.Client()
-    bucket = storage_client.get_bucket(bucket_name)
-    blob = bucket.blob(destination_blob_name)
-
-    blob.upload_from_file(source_file_name)
-
-    print('File {} uploaded to {}.'.format(
-        source_file_name,
-        destination_blob_name))
-
-def download_blob(bucket_name, source_blob_name, destination_file_name):
-    storage_client = storage.Client()
-    bucket = storage_client.get_bucket(bucket_name)
-    blob = bucket.blob(source_blob_name)
-
-    blob.download_to_filename(destination_file_name)
-
-    print('Blob {} downloaded to {}.'.format(
-        source_blob_name,
-        destination_file_name))

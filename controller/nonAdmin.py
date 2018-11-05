@@ -18,8 +18,9 @@ def groups():
                       "FROM group_members " \
                       "INNER JOIN groups ON group_members.idgroup = groups.idgroup " \
                       "WHERE group_members.member = %s AND " \
-                      "group_members.accepted = %s"
-                cursor.execute(sql,(session['userID'], 1))
+                      "group_members.accepted = %s AND " \
+                      "groups.isActive = %s"
+                cursor.execute(sql,(session['userID'], 1, 1))
                 joined = cursor.fetchall();
 
                 sql = "SELECT groups.idgroup, groups.name, groups.owner FROM groups " \

@@ -5,7 +5,6 @@ admin = Blueprint('admin', __name__, template_folder='templates')
 
 @admin.route('/admin/users')
 def adminUsers():
-    print(session)
     if 'isAdmin' in session:
         try:
             with connection.cursor() as cursor:

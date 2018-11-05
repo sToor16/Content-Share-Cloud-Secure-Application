@@ -30,10 +30,12 @@
                     <span>Time Last Accessed: </span>{{ groupData[i]['time_access'] }}<br>
 
                     <form id="download">
-                        <input hidden name="sourceBlobName" value="group_items.name">
+                        <input hidden name="idgroup_items" value="{{ groupData[i]['idgroup_items'] }}">
                     </form>
 
-                    <button onclick="downloadFile()" class="w3-button w3-green">Download</button>
+                    <a href="{{ groupData[i]['file_url'] }}" onclick="downloadFile()" class="w3-button w3-green">
+                        Download
+                    </a>
 
                     <br><br><br>
 
