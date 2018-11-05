@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, session
 from controller import connection, bcrypt
 import datetime
+from controller.dbAccess import insertQuery, fetchQuery
 
 from google.cloud import storage
 
@@ -14,22 +15,14 @@ def hello_world():
 def register():
 
     if request.method == "POST":
-        userName = request.form['user_name']
-        user_id = request.form['user_id']
-
+        params = {}
+        params['userName'] = request.form['user_name']
+        params['user_id'] = request.form['user_id']
         password = request.form['password']
+        params['hashedPw'] = bcrypt.generate_password_hash(password)
 
-        hashedPw = bcrypt.generate_password_hash(password)
-
-        try:
-            with connection.cursor() as cursor:
-
-                sql = "INSERT INTO `Users` (`name`, `userID`, `password`) VALUES (%s, %s, %s)"
-                cursor.execute(sql, (userName, user_id, hashedPw))
-
-            connection.commit()
-        finally:
-            connection.close()
+        sql = "INSERT INTO `Users` (`name`, `userID`, `password`) VALUES (%s, %s, %s)"
+        insertQuery(sql, params)
 
     return render_template('common/register.html', title='register');
 
@@ -37,38 +30,32 @@ def register():
 def login():
 
     if request.method == 'POST':
-        user_id = request.form['user_id']
-        password = request.form['password']
+        params = {}
+        params['user_id'] = request.form['user_id']
+        params['password'] = request.form['password']
 
-        try:
-            with connection.cursor() as cursor:
+        sql = "SELECT * FROM `Users` WHERE userID=%s"
 
-                sql = "SELECT * FROM `Users` WHERE userID=%s"
+        result = fetchQuery(sql, params)
 
-                cursor.execute(sql, (user_id))
-                result = cursor.fetchall()
-
-                if (len(result) == 0):
-                    print("email does not exist")
-                else:
-                    hasPw = result[0]['password']
-                    if bcrypt.check_password_hash(hasPw, password):
-                        if result[0]['isActive'] == 1:
-                            session['userID'] = user_id
-                            session['isActive'] = 'true'
-                            session['name'] = result[0]['name']
-                            if result[0]['isAdmin'] == 1:
-                                session['isAdmin'] = 'true'
-                                return redirect('/admin/users')
-                            else:
-                                return redirect('groups')
-                        else:
-                            print("user not active")
+        if (len(result) == 0):
+            print("email does not exist")
+        else:
+            hasPw = result[0]['password']
+            if bcrypt.check_password_hash(hasPw, params['password']):
+                if result[0]['isActive'] == 1:
+                    session['userID'] = params['user_id']
+                    session['isActive'] = 'true'
+                    session['name'] = result[0]['name']
+                    if result[0]['isAdmin'] == 1:
+                        session['isAdmin'] = 'true'
+                        return redirect('/admin/users')
                     else:
-                        print("wrong credentials")
-        finally:
-            print("connection closed commented")
-            # connection.close()
+                        return redirect('groups')
+                else:
+                    print("user not active")
+            else:
+                print("wrong credentials")
 
     return render_template('common/login.html', title='login');
 
@@ -90,12 +77,14 @@ def selectedGroup():
     try:
         with connection.cursor() as cursor:
 
-            sql = "SELECT groups.owner, groups.name, group_items.* FROM groups " \
+            sql = "SELECT groups.*, group_items.* FROM groups " \
                   "LEFT JOIN group_items " \
                   "ON groups.idgroup = group_items.idgroup " \
                   "WHERE groups.idgroup = %s"
             cursor.execute(sql,(idgroup))
             result = cursor.fetchall();
+
+            print(result)
 
     finally:
         print("connection closed");
@@ -110,6 +99,7 @@ def uploadPage():
 
 @common.route('/uploadFile', methods=['POST'])
 def uploadFile():
+    print(request.form)
     idgroup = request.form['idgroup']
     description = request.form['description']
     name = request.form['name']
@@ -145,9 +135,34 @@ def uploadFile():
 
     return "success"
 
+@common.route('/downloadFile', methods=['POST'])
+def downloadFile():
+
+    bucket_name = 'secure-flask-app-bucket'
+    source_file_name = '7/toor_masters_unofficial_transcript.pdf'
+    destination_blob_name = source_file_name
+
+    download_blob(bucket_name, source_file_name, destination_blob_name)
+    return "success"
+
 def upload_blob(bucket_name, source_file_name, destination_blob_name):
     storage_client = storage.Client()
     bucket = storage_client.get_bucket(bucket_name)
     blob = bucket.blob(destination_blob_name)
 
     blob.upload_from_file(source_file_name)
+
+    print('File {} uploaded to {}.'.format(
+        source_file_name,
+        destination_blob_name))
+
+def download_blob(bucket_name, source_blob_name, destination_file_name):
+    storage_client = storage.Client()
+    bucket = storage_client.get_bucket(bucket_name)
+    blob = bucket.blob(source_blob_name)
+
+    blob.download_to_filename(destination_file_name)
+
+    print('Blob {} downloaded to {}.'.format(
+        source_blob_name,
+        destination_file_name))

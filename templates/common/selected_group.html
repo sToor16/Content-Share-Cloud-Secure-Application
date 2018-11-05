@@ -1,5 +1,7 @@
 <html>
     <head>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="http://malsup.github.com/jquery.form.js"></script>
     </head>
     <body>
         {% include 'common/navigationBar.html' %}<br><br>
@@ -16,22 +18,38 @@
         <div>
             {% for i in range(groupData|length) %}
 
-                {% if groupData[i]['uploader_id'] != None %}
+                {% if groupData[i]['idgroup_items'] != None %}
 
                     <span>uploader_id: </span>{{ groupData[i]['uploader_id'] }}<br>
                     <span>description: </span>{{ groupData[i]['description'] }}<br>
-                    <span>Download URL: </span>{{ groupData[i]['file_url'] }}<br>
                     <span>Name: </span>{{ groupData[i]['group_items.name'] }}<br>
                     <span>Description: </span>{{ groupData[i]['description'] }}<br>
                     <span>Date Created: </span>{{ groupData[i]['date'] }}<br>
                     <span>Time Created: </span>{{ groupData[i]['time'] }}<br>
                     <span>Date Last Accessed: </span>{{ groupData[i]['date_access'] }}<br>
                     <span>Time Last Accessed: </span>{{ groupData[i]['time_access'] }}<br>
+
+                    <form id="download">
+                        <input hidden name="sourceBlobName" value="group_items.name">
+                    </form>
+
+                    <button onclick="downloadFile()" class="w3-button w3-green">Download</button>
+
                     <br><br><br>
 
                 {% endif %}
+
             {% endfor %}
         </div>
+
+        <script>
+            function downloadFile(){
+                 $("#download").ajaxSubmit({
+                    url: 'downloadFile',
+                    type: 'post'
+                 })
+            }
+        </script>
 
     </body>
 </html>
