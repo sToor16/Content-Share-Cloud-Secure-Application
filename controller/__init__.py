@@ -1,21 +1,13 @@
 from flask import Flask
 from flask_bcrypt import Bcrypt
-from controller.config import hostConfig, dbConfig, passwordConfig, userConfig, secretKeyConfig
+from controller.config import secretKeyConfig
 
-import pymysql.cursors
 import os
 
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = 'secure-assignment-acd7ad2495a8.json'
 
 app = Flask('SP Secure')
 app.secret_key = secretKeyConfig
-
-connection = pymysql.connect(host= hostConfig,
-                             user= userConfig,
-                             password= passwordConfig,
-                             db=dbConfig,
-                             charset='utf8mb4',
-                             cursorclass=pymysql.cursors.DictCursor)
 
 bcrypt = Bcrypt(app)
 

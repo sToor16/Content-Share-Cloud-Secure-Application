@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, session
-from controller import connection, bcrypt
+from controller import bcrypt
 import datetime
-from controller.externalAccess import insertQuery, fetchQuery, upload_blob
+from controller.externalAccess import establishConnection, upload_blob
 
 common = Blueprint('common', __name__, template_folder='templates')
 
@@ -19,8 +19,15 @@ def register():
         password = request.form['password']
         params['hashedPw'] = bcrypt.generate_password_hash(password)
 
-        sql = "INSERT INTO `Users` (`name`, `userID`, `password`) VALUES (%s, %s, %s)"
-        insertQuery(sql, params)
+        connection = establishConnection()
+
+        try:
+            with connection.cursor() as cursor:
+                sql = "INSERT INTO `Users` (`name`, `userID`, `password`) VALUES (%s, %s, %s)"
+                cursor.execute(sql, (params['userName'], params['user_id'], params['hashedPw']))
+            connection.commit()
+        finally:
+            connection.close()
 
     return render_template('common/register.html', title='register');
 
@@ -32,27 +39,33 @@ def login():
         params['user_id'] = request.form['user_id']
         params['password'] = request.form['password']
 
-        sql = "SELECT * FROM `Users` WHERE userID=%s"
-        result = fetchQuery(sql, params)
+        try:
+            connection = establishConnection()
 
-        if (len(result) == 0):
-            print("email does not exist")
-        else:
-            hasPw = result[0]['password']
-            if bcrypt.check_password_hash(hasPw, params['password']):
-                if result[0]['isActive'] == 1:
-                    session['userID'] = params['user_id']
-                    session['isActive'] = 'true'
-                    session['name'] = result[0]['name']
-                    if result[0]['isAdmin'] == 1:
-                        session['isAdmin'] = 'true'
-                        return redirect('/admin/users')
-                    else:
-                        return redirect('groups')
+            with connection.cursor() as cursor:
+                sql = "SELECT * FROM `Users` WHERE userID=%s"
+                cursor.execute(sql, (params['user_id']))
+                result = cursor.fetchall()
+                if (len(result) == 0):
+                    print("email does not exist")
                 else:
-                    print("user not active")
-            else:
-                print("wrong credentials")
+                    hasPw = result[0]['password']
+                    if bcrypt.check_password_hash(hasPw, params['password']):
+                        if result[0]['isActive'] == 1:
+                            session['userID'] = params['user_id']
+                            session['isActive'] = 'true'
+                            session['name'] = result[0]['name']
+                            if result[0]['isAdmin'] == 1:
+                                session['isAdmin'] = 'true'
+                                return redirect('/admin/users')
+                            else:
+                                return redirect('groups')
+                        else:
+                            print("user not active")
+                    else:
+                        print("wrong credentials")
+        finally:
+            connection.close()
 
     return render_template('common/login.html', title='login');
 
@@ -70,6 +83,7 @@ def selectedGroup():
     idgroup = request.form['idgroup']
 
     try:
+        connection = establishConnection()
         with connection.cursor() as cursor:
 
             sql = "SELECT groups.*, group_items.* FROM groups " \
@@ -111,6 +125,7 @@ def uploadFile():
     full_file_url = bucket_base + destination_blob_name
 
     try:
+        connection = establishConnection()
         with connection.cursor() as cursor:
 
             sql = "INSERT INTO group_items " \
@@ -124,8 +139,7 @@ def uploadFile():
 
         connection.commit()
     finally:
-        print("connection closed");
-        # connection.close()
+        connection.close()
 
     return "success"
 
@@ -138,6 +152,7 @@ def downloadFile():
     date = now.date()
 
     try:
+        connection = establishConnection()
         with connection.cursor() as cursor:
             sql = "UPDATE group_items SET " \
                   "date_access= %s, time_access = %s " \
@@ -146,7 +161,6 @@ def downloadFile():
         connection.commit()
 
     finally:
-        print("connection closed");
-        # connection.close()
+        connection.close()
 
     return "success"

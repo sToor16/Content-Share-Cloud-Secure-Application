@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, session, redirect, request
-from controller import connection
+from controller.externalAccess import establishConnection
 
 nonAdmin = Blueprint('nonAdmin', __name__, template_folder='templates')
 
@@ -12,6 +12,8 @@ def groups():
 
     if 'isActive' in session:
         try:
+            connection = establishConnection()
+
             with connection.cursor() as cursor:
 
                 sql = "SELECT groups.name, groups.owner, groups.idgroup " \
@@ -44,8 +46,7 @@ def groups():
                 requested = cursor.fetchall();
 
         finally:
-            print("connection closed");
-            # connection.close()
+            connection.close()
 
         return render_template('/nonAdmin/groups.html', joinedGroups = joined, unjoinedGroups = unjoined, requestedGroups = requested)
     else:
@@ -57,16 +58,14 @@ def createGroup():
     owner = session['userID']
 
     try:
+        connection = establishConnection()
         with connection.cursor() as cursor:
 
             sql = "INSERT INTO `groups` (`owner`, `name`) VALUES (%s, %s)"
             cursor.execute(sql,(owner, name))
             connection.commit()
     finally:
-        print("connection closed");
-        # connection.close()
-
-
+        connection.close()
     return redirect('/groups')
 
 @nonAdmin.route('/joinGroup', methods=['GET', 'POST'])
@@ -74,13 +73,13 @@ def joinGroup():
     idgroup = request.form['groupID']
 
     try:
+        connection = establishConnection()
         with connection.cursor() as cursor:
 
             sql = "INSERT INTO group_members (idgroup, member)VALUES (%s, %s)"
             cursor.execute(sql,(idgroup, session['userID']))
             connection.commit()
     finally:
-        print("connection closed");
-        # connection.close()
+        connection.close()
 
     return redirect('/groups')

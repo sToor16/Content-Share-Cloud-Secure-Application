@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, session, redirect, request
-from controller import connection
+from controller.externalAccess import establishConnection
 
 admin = Blueprint('admin', __name__, template_folder='templates')
 
@@ -7,6 +7,7 @@ admin = Blueprint('admin', __name__, template_folder='templates')
 def adminUsers():
     if 'isAdmin' in session:
         try:
+            connection = establishConnection()
             with connection.cursor() as cursor:
                 isAdmin = 0;
                 sql = "SELECT userID, name, isActive FROM `Users` WHERE isAdmin=%s"
@@ -14,8 +15,7 @@ def adminUsers():
                 cursor.execute(sql, (isAdmin))
                 result = cursor.fetchall()
         finally:
-            print("connection closed commented")
-            # connection.close()
+            connection.close()
         return render_template('admin/users.html', users = result);
     else:
         return "NO ACCESS SORRY"
@@ -24,6 +24,7 @@ def adminUsers():
 def adminGroups():
     if 'isAdmin' in session:
         try:
+            connection = establishConnection()
             with connection.cursor() as cursor:
                 isAdmin = 0;
                 sql = "SELECT * FROM `groups`"
@@ -39,8 +40,7 @@ def adminGroups():
                 acceptRequests = cursor.fetchall()
                 print(acceptRequests)
         finally:
-            print("connection closed commented")
-            # connection.close()
+            connection.close()
         return render_template('admin/groups.html', groups = result, acceptRequests = acceptRequests);
     else:
         return "NO ACCESS SORRY"
@@ -49,42 +49,42 @@ def adminGroups():
 def deactivateUser():
     user_id = request.form['deactivateUserID']
     try:
+        connection = establishConnection()
         with connection.cursor() as cursor:
             sql = "UPDATE `Users` SET isActive = '%s' WHERE userID=%s"
             cursor.execute(sql, (0,user_id))
             result = cursor.fetchall()
             connection.commit()
     finally:
-        print("connection closed commented")
-        # connection.close()
+        connection.close()
     return redirect('/admin/users')
 
 @admin.route('/admin/activateUser', methods = ['GET','POST'])
 def activateUser():
     user_id = request.form['activateUserID']
     try:
+        connection = establishConnection()
         with connection.cursor() as cursor:
             sql = "UPDATE `Users` SET isActive = '%s' WHERE userID=%s"
             cursor.execute(sql, (1,user_id))
             result = cursor.fetchall()
             connection.commit()
     finally:
-        print("connection closed commented")
-        # connection.close()
+        connection.close()
     return redirect('/admin/users')
 
 @admin.route('/admin/deactivateGroup', methods = ['GET', 'POST'])
 def deactivateGroup():
     idgroup = request.form['deactivateGroupID']
     try:
+        connection = establishConnection()
         with connection.cursor() as cursor:
             sql = "UPDATE `groups` SET isActive = '%s' WHERE idgroup=%s"
             cursor.execute(sql, (0, idgroup))
             result = cursor.fetchall()
             connection.commit()
     finally:
-        print("connection closed commented")
-        # connection.close()
+        connection.close()
 
     return redirect('/admin/groups')
 
@@ -97,6 +97,8 @@ def activateGroup():
     print("idgroup: " + idgroup)
     print("groupOwner: " + groupOwner)
     try:
+        connection = establishConnection()
+
         with connection.cursor() as cursor:
             sql = "UPDATE `groups` SET isActive = '%s' WHERE idgroup=%s"
             cursor.execute(sql, (1, idgroup))
@@ -106,7 +108,7 @@ def activateGroup():
             cursor.execute(sql,(idgroup,groupOwner,1))
             connection.commit()
     finally:
-        print("connection closed commented")
+        connection.close()
     return redirect('/admin/groups')
 
 @admin.route('/admin/acceptGroupJoin', methods=['GET','POST'])
@@ -114,12 +116,14 @@ def acceptGroupJoin():
     idRequest = request.form['requestID']
 
     try:
+        connection = establishConnection()
+
         with connection.cursor() as cursor:
             sql = "UPDATE group_members SET accepted = '%s' " \
                   "WHERE id = %s"
             cursor.execute(sql, (1, idRequest))
             connection.commit()
     finally:
-        print("connection closed commented")
+        connection.close()
 
     return redirect('/admin/groups')
