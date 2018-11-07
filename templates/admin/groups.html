@@ -27,9 +27,9 @@
                                 {{ groups[i]['owner'] }}
                             </td>
                             <td width="33.33%">
-                                <form method="post" action="/admin/deactivateGroup">
-                                    <button name="deactivateGroupID" type="submit" value="{{ groups[i]['idgroup'] }}" class="w3-btn w3-green w3-center">
-                                        Deactivate Group
+                                <form method="post" action="/admin/deleteGroup">
+                                    <button name="deleteGroupID" type="submit" value="{{ groups[i]['idgroup'] }}" class="w3-btn w3-green w3-center">
+                                        Delete Group
                                     </button>
                                 </form>
                             </td>

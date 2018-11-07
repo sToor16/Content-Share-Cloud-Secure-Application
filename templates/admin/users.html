@@ -28,9 +28,9 @@
                                 {{ users[i]['name'] }}
                             </td>
                             <td width="33.33%">
-                                <form method="post" action="/admin/deactivateUser">
-                                    <button name="deactivateUserID" type="submit" value="{{ users[i]['userID'] }}" class="w3-btn w3-green w3-center">
-                                        Deactivate User
+                                <form method="post" action="/admin/deleteUser">
+                                    <button name="deleteUserID" type="submit" value="{{ users[i]['userID'] }}" class="w3-btn w3-green w3-center">
+                                        Delete User
                                     </button>
                                 </form>
                             </td>

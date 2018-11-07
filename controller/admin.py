@@ -45,14 +45,14 @@ def adminGroups():
     else:
         return "NO ACCESS SORRY"
 
-@admin.route('/admin/deactivateUser', methods = ['GET','POST'])
+@admin.route('/admin/deleteUser', methods = ['GET','POST'])
 def deactivateUser():
-    user_id = request.form['deactivateUserID']
+    user_id = request.form['deleteUserID']
     try:
         connection = establishConnection()
         with connection.cursor() as cursor:
-            sql = "UPDATE `Users` SET isActive = '%s' WHERE userID=%s"
-            cursor.execute(sql, (0,user_id))
+            sql = "DELETE FROM Users WHERE userID=%s"
+            cursor.execute(sql, (user_id))
             result = cursor.fetchall()
             connection.commit()
     finally:
@@ -73,14 +73,14 @@ def activateUser():
         connection.close()
     return redirect('/admin/users')
 
-@admin.route('/admin/deactivateGroup', methods = ['GET', 'POST'])
+@admin.route('/admin/deleteGroup', methods = ['GET', 'POST'])
 def deactivateGroup():
-    idgroup = request.form['deactivateGroupID']
+    idgroup = request.form['deleteGroupID']
     try:
         connection = establishConnection()
         with connection.cursor() as cursor:
-            sql = "UPDATE `groups` SET isActive = '%s' WHERE idgroup=%s"
-            cursor.execute(sql, (0, idgroup))
+            sql = "DELETE FROM groups WHERE idgroup=%s"
+            cursor.execute(sql, (idgroup))
             result = cursor.fetchall()
             connection.commit()
     finally:
