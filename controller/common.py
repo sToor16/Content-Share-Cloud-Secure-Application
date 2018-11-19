@@ -6,31 +6,6 @@ from controller.externalAccess import establishConnection, upload_blob
 common = Blueprint('common', __name__, template_folder='templates')
 
 @common.route('/')
-def hello_world():
-    return "Welcome to my Secure Website"
-
-@common.route('/register', methods=["GET","POST"])
-def register():
-
-    if request.method == "POST":
-        params = {}
-        params['userName'] = request.form['user_name']
-        params['user_id'] = request.form['user_id']
-        password = request.form['password']
-        params['hashedPw'] = bcrypt.generate_password_hash(password)
-
-        connection = establishConnection()
-
-        try:
-            with connection.cursor() as cursor:
-                sql = "INSERT INTO `Users` (`name`, `userID`, `password`) VALUES (%s, %s, %s)"
-                cursor.execute(sql, (params['userName'], params['user_id'], params['hashedPw']))
-            connection.commit()
-        finally:
-            connection.close()
-
-    return render_template('common/register.html', title='register');
-
 @common.route('/login', methods=['GET', 'POST'])
 def login():
 
@@ -68,6 +43,28 @@ def login():
             connection.close()
 
     return render_template('common/login.html', title='login');
+
+@common.route('/register', methods=["GET","POST"])
+def register():
+
+    if request.method == "POST":
+        params = {}
+        params['userName'] = request.form['user_name']
+        params['user_id'] = request.form['user_id']
+        password = request.form['password']
+        params['hashedPw'] = bcrypt.generate_password_hash(password)
+
+        connection = establishConnection()
+
+        try:
+            with connection.cursor() as cursor:
+                sql = "INSERT INTO `Users` (`name`, `userID`, `password`) VALUES (%s, %s, %s)"
+                cursor.execute(sql, (params['userName'], params['user_id'], params['hashedPw']))
+            connection.commit()
+        finally:
+            connection.close()
+
+    return render_template('common/register.html', title='register');
 
 @common.route('/logout', methods=['GET'])
 def logout():
