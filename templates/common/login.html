@@ -8,7 +8,9 @@
         {% with messages = get_flashed_messages() %}
             {% if messages %}
                 {% for message in messages %}
-                    {{ message }}
+                    <div>
+                        <span class="w3-red">{{ message }}</span>
+                    </div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
