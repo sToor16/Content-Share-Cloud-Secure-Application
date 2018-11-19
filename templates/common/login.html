@@ -4,6 +4,15 @@
     </head>
     <body>
         {% include 'common/navigationBar.html' %}<br><br>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    {{ message }}
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
         <form action="/login" method="post">
             <input value="toor16" name="user_id" type="text" placeholder="user ID"><br>
             <input value="1234" name="password" type="password" placeholder="password"><br>
