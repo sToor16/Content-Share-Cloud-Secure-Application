@@ -20,6 +20,8 @@ def upload_blob(bucket_name, source_file_name, destination_blob_name):
     blob.upload_from_file(source_file_name)
 
 def download_blob(bucket_name, source_blob_name, destination_file_name):
+
+    print('here')
     storage_client = storage.Client()
     bucket = storage_client.get_bucket(bucket_name)
     blob = bucket.blob(source_blob_name)

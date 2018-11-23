@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, session, flash
 from controller import bcrypt
 import re
 import datetime
+import os
 from controller.externalAccess import establishConnection, upload_blob, download_blob
 
 common = Blueprint('common', __name__, template_folder='templates')
@@ -113,12 +114,8 @@ def selectedGroup():
                   "WHERE groups.idgroup = %s"
             cursor.execute(sql,(idgroup))
             result = cursor.fetchall();
-
-            print(result)
-
     finally:
-        print("connection closed");
-        # connection.close()
+        connection.close()
 
     return render_template('common/selected_group.html', groupData = result);
 
@@ -133,36 +130,64 @@ def uploadFile():
     description = request.form['description']
     name = request.form['name']
 
-    file = request.files.get('file')
-
-    bucket_name = 'secure-flask-app-bucket'
-    destination_blob_name = idgroup + "/" + file.filename
-    upload_blob(bucket_name, file, destination_blob_name)
-
     now = datetime.datetime.now()
     time = now.time()
     date = now.date()
-    bucket_base = 'https://storage.googleapis.com/secure-flask-app-bucket/'
-    full_file_url = bucket_base + destination_blob_name
+    date = date.strftime('%m%d%Y')
+    time = time.strftime('%H%B')
 
-    try:
-        connection = establishConnection()
-        with connection.cursor() as cursor:
+    file = request.files.get('file')
 
-            sql = "INSERT INTO group_items " \
-                  "(idgroup, file_url, uploader_id, name, description, " \
-                  "date, time, date_access, time_access) " \
-                  "VALUES " \
-                  "(%s, %s, %s, %s, %s, %s, %s, %s, %s)"
-            cursor.execute(sql, (idgroup, full_file_url, session['userID'], name,
-                                 description, date, time, date, time))
+    fileSize = getFileSize(file)
 
+    bucket_name = 'secure-flask-app-bucket'
+    destination_blob_name = time + '_' + date + '_' + file.filename
+    print("before")
+    upload_blob(bucket_name, file, destination_blob_name)
 
-        connection.commit()
-    finally:
-        connection.close()
+    print("uploaded?")
 
+    # bucket_base = 'https://storage.googleapis.com/secure-flask-app-bucket/'
+    # full_file_url = bucket_base + destination_blob_name
+    #
+    # try:
+    #     connection = establishConnection()
+    #     with connection.cursor() as cursor:
+    #         sql = "SELECT totalSize FROM groups " \
+    #               "WHERE idGroup = %s"
+    #         cursor.execute(sql,(idgroup))
+    #         result = cursor.fetchall()
+    #         groupTotalSize = (float) (result[0]['totalSize'])
+    #
+    #         newGroupTotalSize = groupTotalSize + fileSize
+    #
+    #         if newGroupTotalSize > 100:
+    #             print("file cannot be uploaded, group already using allocated memory")
+    #             return "failed"
+    #
+    #         sql = "UPDATE groups SET totalSize = %s " \
+    #               "WHERE idgroup = %s"
+    #         cursor.execute(sql, (newGroupTotalSize, idgroup))
+    #
+    #         sql = "INSERT INTO group_items " \
+    #               "(idgroup, file_url, uploader_id, name, description, " \
+    #               "date, time, date_access, time_access, size) " \
+    #               "VALUES " \
+    #               "(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+    #         cursor.execute(sql, (idgroup, full_file_url, session['userID'], name,
+    #                              description, date, time, date, time, fileSize))
+    #     connection.commit()
+    # finally:
+    #     connection.close()
     return "success"
+
+def getFileSize(file):
+    request.files['file'].save('/tmp/file')
+    fileSize = os.stat('/tmp/file').st_size
+    fileSize = str(fileSize / (1024 * 1024))
+    fileSize = fileSize[0:4]
+    fileSize = float(fileSize)
+    return fileSize
 
 @common.route('/downloadFile', methods=['POST'])
 def downloadFile():
@@ -174,7 +199,12 @@ def downloadFile():
 
     bucket_name = 'secure-flask-app-bucket'
 
+    source_blob_name =  'Itinerary_ Delhi.pdf_20January00_11212018'
+    destination_file_name = source_blob_name
+
     try:
+
+        # download_blob(bucket_name, source_blob_name, destination_file_name)
         connection = establishConnection()
         with connection.cursor() as cursor:
             sql = "UPDATE group_items SET " \
