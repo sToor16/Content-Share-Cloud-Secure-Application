@@ -136,49 +136,47 @@ def uploadFile():
     date = date.strftime('%m%d%Y')
     time = time.strftime('%H%B')
 
+
     file = request.files.get('file')
+
+    bucket_name = 'secure-flask-app-bucket'
+    destination_blob_name = date + '_' + time + '_' + file.filename
+    upload_blob(bucket_name, file, destination_blob_name)
 
     fileSize = getFileSize(file)
 
-    bucket_name = 'secure-flask-app-bucket'
-    destination_blob_name = time + '_' + date + '_' + file.filename
-    print("before")
-    upload_blob(bucket_name, file, destination_blob_name)
+    bucket_base = 'https://storage.googleapis.com/secure-flask-app-bucket/'
+    full_file_url = bucket_base + destination_blob_name
 
-    print("uploaded?")
+    try:
+        connection = establishConnection()
+        with connection.cursor() as cursor:
+            sql = "SELECT totalSize FROM groups " \
+                  "WHERE idGroup = %s"
+            cursor.execute(sql,(idgroup))
+            result = cursor.fetchall()
+            groupTotalSize = (float) (result[0]['totalSize'])
 
-    # bucket_base = 'https://storage.googleapis.com/secure-flask-app-bucket/'
-    # full_file_url = bucket_base + destination_blob_name
-    #
-    # try:
-    #     connection = establishConnection()
-    #     with connection.cursor() as cursor:
-    #         sql = "SELECT totalSize FROM groups " \
-    #               "WHERE idGroup = %s"
-    #         cursor.execute(sql,(idgroup))
-    #         result = cursor.fetchall()
-    #         groupTotalSize = (float) (result[0]['totalSize'])
-    #
-    #         newGroupTotalSize = groupTotalSize + fileSize
-    #
-    #         if newGroupTotalSize > 100:
-    #             print("file cannot be uploaded, group already using allocated memory")
-    #             return "failed"
-    #
-    #         sql = "UPDATE groups SET totalSize = %s " \
-    #               "WHERE idgroup = %s"
-    #         cursor.execute(sql, (newGroupTotalSize, idgroup))
-    #
-    #         sql = "INSERT INTO group_items " \
-    #               "(idgroup, file_url, uploader_id, name, description, " \
-    #               "date, time, date_access, time_access, size) " \
-    #               "VALUES " \
-    #               "(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-    #         cursor.execute(sql, (idgroup, full_file_url, session['userID'], name,
-    #                              description, date, time, date, time, fileSize))
-    #     connection.commit()
-    # finally:
-    #     connection.close()
+            newGroupTotalSize = groupTotalSize + fileSize
+
+            if newGroupTotalSize > 100:
+                print("file cannot be uploaded, group already using allocated memory")
+                return "failed"
+
+            sql = "UPDATE groups SET totalSize = %s " \
+                  "WHERE idgroup = %s"
+            cursor.execute(sql, (newGroupTotalSize, idgroup))
+
+            sql = "INSERT INTO group_items " \
+                  "(idgroup, file_url, uploader_id, name, description, " \
+                  "date, time, date_access, time_access, size) " \
+                  "VALUES " \
+                  "(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+            cursor.execute(sql, (idgroup, full_file_url, session['userID'], name,
+                                 description, date, time, date, time, fileSize))
+        connection.commit()
+    finally:
+        connection.close()
     return "success"
 
 def getFileSize(file):
