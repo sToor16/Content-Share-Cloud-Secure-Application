@@ -3,7 +3,10 @@ from controller import bcrypt
 import re
 import datetime
 import os
-from controller.externalAccess import establishConnection, upload_blob, download_blob
+from controller.externalAccess import establishConnection, upload_blob
+
+bucket_name = 'secure-flask-app-bucket'
+bucket_base = 'https://storage.googleapis.com/secure-flask-app-bucket/'
 
 common = Blueprint('common', __name__, template_folder='templates')
 
@@ -140,25 +143,28 @@ def uploadFile():
 
 
     file = request.files.get('file')
-
-    bucket_name = 'secure-flask-app-bucket'
-    destination_blob_name = params['date'] + '_' + params['time'] + '_' + file.filename
-    upload_blob(bucket_name, file, destination_blob_name)
+    fileTemp = file
 
     params['fileSize'] = getFileSize(file)
+    print("outside file size is: ", params['fileSize'])
 
-    bucket_base = 'https://storage.googleapis.com/secure-flask-app-bucket/'
-    params['full_file_url'] = bucket_base + destination_blob_name
 
-    dbQueries(params)
+    destination_blob_name = params['date'] + '_' + params['time'] + '_' + file.filename
+    upload_blob(bucket_name, fileTemp, destination_blob_name)
+
+
+    # params['full_file_url'] = bucket_base + destination_blob_name
+
+    # dbQueries(params)
     return "success"
 
 def getFileSize(file):
-    request.files['file'].save('/tmp/file')
+    file.save('/tmp/file')
     fileSize = os.stat('/tmp/file').st_size
     fileSize = str(fileSize / (1024 * 1024))
     fileSize = fileSize[0:4]
     fileSize = float(fileSize)
+
     return fileSize
 
 def dbQueries(params):
@@ -172,11 +178,13 @@ def dbQueries(params):
             groupTotalSize = (float) (result[0]['totalSize'])
 
             newGroupTotalSize = groupTotalSize + params['fileSize']
+            print("newGroupTotalSize is: ", newGroupTotalSize)
 
             if newGroupTotalSize > 100:
                 print("file cannot be uploaded, group already using allocated memory")
                 return "failed"
             else:
+                print("size is smaller, new file size is: ",params['fileSize'])
                 sql = "UPDATE groups SET totalSize = %s " \
                       "WHERE idgroup = %s"
                 cursor.execute(sql, (newGroupTotalSize, params['idgroup']))
