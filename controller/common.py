@@ -126,57 +126,31 @@ def uploadPage():
 
 @common.route('/uploadFile', methods=['POST'])
 def uploadFile():
-    idgroup = request.form['idgroup']
-    description = request.form['description']
-    name = request.form['name']
+    params = {}
+
+    params['idgroup'] = request.form['idgroup']
+    params['description'] = request.form['description']
+    params['name'] = request.form['name']
 
     now = datetime.datetime.now()
     time = now.time()
     date = now.date()
-    date = date.strftime('%m%d%Y')
-    time = time.strftime('%H%B')
+    params['date'] = date.strftime('%m%d%Y')
+    params['time'] = time.strftime('%H%B')
 
 
     file = request.files.get('file')
 
     bucket_name = 'secure-flask-app-bucket'
-    destination_blob_name = date + '_' + time + '_' + file.filename
+    destination_blob_name = params['date'] + '_' + params['time'] + '_' + file.filename
     upload_blob(bucket_name, file, destination_blob_name)
 
-    fileSize = getFileSize(file)
+    params['fileSize'] = getFileSize(file)
 
     bucket_base = 'https://storage.googleapis.com/secure-flask-app-bucket/'
-    full_file_url = bucket_base + destination_blob_name
+    params['full_file_url'] = bucket_base + destination_blob_name
 
-    try:
-        connection = establishConnection()
-        with connection.cursor() as cursor:
-            sql = "SELECT totalSize FROM groups " \
-                  "WHERE idGroup = %s"
-            cursor.execute(sql,(idgroup))
-            result = cursor.fetchall()
-            groupTotalSize = (float) (result[0]['totalSize'])
-
-            newGroupTotalSize = groupTotalSize + fileSize
-
-            if newGroupTotalSize > 100:
-                print("file cannot be uploaded, group already using allocated memory")
-                return "failed"
-
-            sql = "UPDATE groups SET totalSize = %s " \
-                  "WHERE idgroup = %s"
-            cursor.execute(sql, (newGroupTotalSize, idgroup))
-
-            sql = "INSERT INTO group_items " \
-                  "(idgroup, file_url, uploader_id, name, description, " \
-                  "date, time, date_access, time_access, size) " \
-                  "VALUES " \
-                  "(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-            cursor.execute(sql, (idgroup, full_file_url, session['userID'], name,
-                                 description, date, time, date, time, fileSize))
-        connection.commit()
-    finally:
-        connection.close()
+    dbQueries(params)
     return "success"
 
 def getFileSize(file):
@@ -186,6 +160,38 @@ def getFileSize(file):
     fileSize = fileSize[0:4]
     fileSize = float(fileSize)
     return fileSize
+
+def dbQueries(params):
+    try:
+        connection = establishConnection()
+        with connection.cursor() as cursor:
+            sql = "SELECT totalSize FROM groups " \
+                  "WHERE idGroup = %s"
+            cursor.execute(sql,(params['idgroup']))
+            result = cursor.fetchall()
+            groupTotalSize = (float) (result[0]['totalSize'])
+
+            newGroupTotalSize = groupTotalSize + params['fileSize']
+
+            if newGroupTotalSize > 100:
+                print("file cannot be uploaded, group already using allocated memory")
+                return "failed"
+            else:
+                sql = "UPDATE groups SET totalSize = %s " \
+                      "WHERE idgroup = %s"
+                cursor.execute(sql, (newGroupTotalSize, params['idgroup']))
+
+                sql = "INSERT INTO group_items " \
+                      "(idgroup, file_url, uploader_id, name, description, " \
+                      "date, time, date_access, time_access, size) " \
+                      "VALUES " \
+                      "(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+                cursor.execute(sql, (params['idgroup'], params['full_file_url'], session['userID'],
+                                     params['name'], params['description'], params['date'],
+                                     params['time'], params['date'], params['time'], params['fileSize']))
+        connection.commit()
+    finally:
+        connection.close()
 
 @common.route('/downloadFile', methods=['POST'])
 def downloadFile():
