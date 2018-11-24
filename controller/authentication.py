@@ -49,45 +49,74 @@ def login():
 @authentication.route('/register', methods=["GET","POST"])
 def register():
 
+    params = {}
+
     if request.method == "POST":
-        userName = request.form['user_name']
-        user_id = request.form['user_id']
-        password = request.form['password']
+        params['userName'] = request.form['user_name']
+        params['user_id'] = request.form['user_id']
+        params['password'] = request.form['password']
 
+        flag = checkLengthOfParams(params)
+        if flag == 1:
+            exists = checkIdAvailable(params['user_id'])
 
-        if len(userName) == 0:
-            flash("Please enter username")
-            return render_template('common/register.html')
-        elif len(userName) > 80:
-            flash("Username to long")
-            return render_template('common/register.html')
+            if exists == 1:
+                flash("User is already exists")
+            else:
+                addUser(params)
 
-        if len(user_id) == 0:
-            flash("Please enter userid")
-            return render_template('common/register.html')
-        elif len(user_id) > 16:
-            flash("user id too long")
-            return render_template('common/register.html')
+    return render_template('common/register.html')
 
-        if not re.match(r'[A-Za-z0-9@#$%^&+=]{8,}', password):
-            flash("Password must contain Uppercase, lowercase, digit and special "
-                  "character and should be atleast 8 characters long")
-            return render_template('common/register.html')
+def checkLengthOfParams(params):
+    if len(params['userName']) == 0:
+        flash("Please enter username")
+        return render_template('common/register.html')
+    elif len(params['userName']) > 80:
+        flash("Username to long")
+        return render_template('common/register.html')
 
+    if len(params['user_id']) == 0:
+        flash("Please enter userid")
+        return render_template('common/register.html')
+    elif len(params['user_id']) > 16:
+        flash("user id too long")
+        return render_template('common/register.html')
 
-        hashedPw = bcrypt.generate_password_hash(password)
+    if not re.match(r'[A-Za-z0-9@#$%^&+=]{8,}', params['password']):
+        flash("Password must contain Uppercase, lowercase, digit and special "
+              "character and should be atleast 8 characters long")
+        return render_template('common/register.html')
+    return 1
 
-        connection = establishConnection()
+def checkIdAvailable(userId):
+    exists = 0
+    connection = establishConnection()
+    try:
+        with connection.cursor() as cursor:
+            sql = "SELECT COUNT(*) FROM Users " \
+                  "WHERE userID = %s"
+            cursor.execute(sql, (userId))
+            result = cursor.fetchall()
+            count = result[0]['COUNT(*)']
+            if count == 1:
+                exists = 1
+        connection.commit()
+    finally:
+        connection.close()
 
-        try:
-            with connection.cursor() as cursor:
-                sql = "INSERT INTO `Users` (`name`, `userID`, `password`) VALUES (%s, %s, %s)"
-                cursor.execute(sql, (userName, user_id,hashedPw))
-            connection.commit()
-        finally:
-            connection.close()
+    return exists
 
-    return render_template('common/register.html');
+def addUser(params):
+    hashedPw = bcrypt.generate_password_hash(params['password'])
+
+    connection = establishConnection()
+    try:
+        with connection.cursor() as cursor:
+            sql = "INSERT INTO Users (name, userID, password) VALUES (%s, %s, %s)"
+            cursor.execute(sql, (params['userName'], params['user_id'], hashedPw))
+        connection.commit()
+    finally:
+        connection.close()
 
 @authentication.route('/logout', methods=['GET'])
 def logout():
