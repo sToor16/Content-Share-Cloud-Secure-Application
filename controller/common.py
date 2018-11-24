@@ -1,5 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, session, flash
-
+from flask import Blueprint, render_template, request, session
 import datetime
 import os
 from controller.externalAccess import establishConnection, upload_blob
@@ -24,6 +23,7 @@ def selectedGroup():
                   "WHERE groups.idgroup = %s"
             cursor.execute(sql,(idgroup))
             result = cursor.fetchall();
+            print(result)
     finally:
         connection.close()
 
@@ -48,31 +48,17 @@ def uploadFile():
     params['date'] = date.strftime('%m%d%Y')
     params['time'] = time.strftime('%H%B')
 
+    file = request.files['file']
 
-    file = request.files.get('file')
-    fileTemp = file
+    params['fileName'] = params['date'] + '_' + params['time'] + '_' + file.filename
+    createTempFile(file, params['fileName'])
 
-    params['fileSize'] = getFileSize(file)
-    print("outside file size is: ", params['fileSize'])
-
-
-    destination_blob_name = params['date'] + '_' + params['time'] + '_' + file.filename
-    upload_blob(bucket_name, fileTemp, destination_blob_name)
-
-
-    # params['full_file_url'] = bucket_base + destination_blob_name
-
-    # dbQueries(params)
+    dbQueries(params)
     return "success"
 
-def getFileSize(file):
-    file.save('/tmp/file')
-    fileSize = os.stat('/tmp/file').st_size
-    fileSize = str(fileSize / (1024 * 1024))
-    fileSize = fileSize[0:4]
-    fileSize = float(fileSize)
-
-    return fileSize
+def createTempFile(file, fileName):
+    path = '/tmp/'+ fileName
+    file.save(path)
 
 def dbQueries(params):
     try:
@@ -82,16 +68,19 @@ def dbQueries(params):
                   "WHERE idGroup = %s"
             cursor.execute(sql,(params['idgroup']))
             result = cursor.fetchall()
-            groupTotalSize = (float) (result[0]['totalSize'])
 
+            groupTotalSize = float (result[0]['totalSize'])
+            params['fileSize'] = getFileSize(params['fileName'])
             newGroupTotalSize = groupTotalSize + params['fileSize']
-            print("newGroupTotalSize is: ", newGroupTotalSize)
 
             if newGroupTotalSize > 100:
                 print("file cannot be uploaded, group already using allocated memory")
                 return "failed"
             else:
-                print("size is smaller, new file size is: ",params['fileSize'])
+                filePath = '/tmp/' + params['fileName']
+                upload_blob(bucket_name, filePath, params['fileName'])
+                params['full_file_url'] = bucket_base + params['fileName']
+
                 sql = "UPDATE groups SET totalSize = %s " \
                       "WHERE idgroup = %s"
                 cursor.execute(sql, (newGroupTotalSize, params['idgroup']))
@@ -107,6 +96,14 @@ def dbQueries(params):
         connection.commit()
     finally:
         connection.close()
+
+def getFileSize(path):
+    path = '/tmp/'+path
+    fileSize = os.stat(path).st_size
+    fileSize = str(fileSize / (1024 * 1024))
+    fileSize = fileSize[0:4]
+    fileSize = float(fileSize)
+    return fileSize
 
 @common.route('/downloadFile', methods=['POST'])
 def downloadFile():
