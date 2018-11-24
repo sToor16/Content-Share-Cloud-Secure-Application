@@ -5,44 +5,52 @@
     </head>
     <body>
         {% include 'common/navigationBar.html' %}<br><br>
-        <h3>Group Name</h3>
-        {{ groupData[0]['name'] }}
-        <h3>Group Owner</h3>
-        {{ groupData[0]['owner'] }}<br>
+        <div class="w3-container w3-grey">
+            <h3 class="w3-center">Group Name</h3>
+            <div class="w3-center">
+                <span>{{ groupData[0]['name'] }}</span>
+            </div>
+            <h3 class="w3-center">Group Owner</h3>
+            <div class="w3-center">
+                <span >{{ groupData[0]['owner'] }}</span><br>
+            </div>
+            <div class="w3-center">
+                {% if session['isAdmin'] != 'true' %}
+                    <form method="post" action="/uploadNewFile">
+                        <input hidden name="idgroup" value="{{ groupData[0]['idgroup'] }}">
+                        <input type="submit" class="w3-button w3-green" value="New Upload">
+                    </form>
+                {% endif %}
+            </div>
+        </div>
 
-        {% if session['isAdmin'] != 'true' %}
-            <form method="post" action="/uploadNewFile">
-                <input hidden name="idgroup" value="{{ groupData[0]['idgroup'] }}">
-                <input type="submit" class="w3-button w3-green" value="New Upload">
-            </form>
-        {% endif %}
-
-        <div>
+        <div style="margin-left: 10px">
             {% for i in range(groupData|length) %}
-
                 {% if groupData[i]['idgroup_items'] != None %}
-
+                    <br>
                     <span>uploader_id: </span>{{ groupData[i]['uploader_id'] }}<br>
                     <span>description: </span>{{ groupData[i]['description'] }}<br>
                     <span>Name: </span>{{ groupData[i]['group_items.name'] }}<br>
-                    <span>Description: </span>{{ groupData[i]['description'] }}<br>
                     <span>Date Created: </span>{{ groupData[i]['date'] }}<br>
                     <span>Time Created: </span>{{ groupData[i]['time'] }}<br>
                     <span>Date Last Accessed: </span>{{ groupData[i]['date_access'] }}<br>
                     <span>Time Last Accessed: </span>{{ groupData[i]['time_access'] }}<br>
-
-                    <form id="download">
-                        <input hidden name="idgroup_items" value="{{ groupData[i]['idgroup_items'] }}">
-                    </form>
-
+                    <br>
                     <a href="{{ groupData[i]['file_url'] }}" onclick="downloadFile()" class="w3-button w3-green">
                         Download
-                    </a>
-
-                    <br><br><br>
+                    </a><br><br>
+                    <form method="post" action="deleteGroupItem">
+                        <input hidden name="idgroup" value="{{ groupData[i]['idgroup'] }}">
+                        {% if session['userID'] == groupData[i]['uploader_id'] %}
+                            <button name="deleteItemId" type="submit" value="{{ groupData[i]['idgroup_items'] }}" class="w3-btn w3-red">
+                                Delete
+                            </button>
+                        {% endif %}
+                    </form>
+                    <br>
+                    <hr>
 
                 {% endif %}
-
             {% endfor %}
         </div>
 

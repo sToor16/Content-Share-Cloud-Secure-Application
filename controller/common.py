@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, session
+from flask import Blueprint, render_template, request, session, redirect
 import datetime
 import os
 from controller.externalAccess import establishConnection, upload_blob
@@ -11,7 +11,9 @@ common = Blueprint('common', __name__, template_folder='templates')
 @common.route('/selectedGroup', methods=['GET','POST'])
 def selectedGroup():
 
-    idgroup = request.form['idgroup']
+    if request.method == 'POST':
+        idgroup = request.form['idgroup']
+        print(idgroup)
 
     try:
         connection = establishConnection()
@@ -23,7 +25,6 @@ def selectedGroup():
                   "WHERE groups.idgroup = %s"
             cursor.execute(sql,(idgroup))
             result = cursor.fetchall();
-            print(result)
     finally:
         connection.close()
 
@@ -106,6 +107,7 @@ def getFileSize(path):
     return fileSize
 
 @common.route('/downloadFile', methods=['POST'])
+
 def downloadFile():
     idgroup_items = request.form['idgroup_items']
 
@@ -126,3 +128,67 @@ def downloadFile():
         connection.close()
 
     return "success"
+
+@common.route('/deleteGroupItem', methods=['POST'])
+def deleteGroupItem():
+    deleteItemId = request.form['deleteItemId']
+    idgroup = request.form['idgroup']
+
+    itemSize = fetchDeleteItemSize(deleteItemId)
+    deleteItem(deleteItemId)
+    updateGroupSize(itemSize, idgroup)
+
+    return "success"
+
+def fetchDeleteItemSize(deleteItemId):
+    result = 0
+    try:
+        connection = establishConnection()
+        with connection.cursor() as cursor:
+            sql = "SELECT size FROM group_items " \
+                  "WHERE idgroup_items = %s"
+            cursor.execute(sql,(deleteItemId))
+            result = cursor.fetchall()
+            result = result[0]['size']
+    finally:
+        connection.close()
+
+    return result
+
+
+def deleteItem(deleteItemId):
+    try:
+        connection = establishConnection()
+        with connection.cursor() as cursor:
+            sql = "DELETE FROM group_items " \
+                  "WHERE idgroup_items = %s"
+            cursor.execute(sql,(deleteItemId))
+        connection.commit()
+    finally:
+        connection.close()
+
+def updateGroupSize(itemSize, idgroup):
+    try:
+        connection = establishConnection()
+        with connection.cursor() as cursor:
+            sql = "SELECT totalSize FROM groups " \
+                  "WHERE idgroup = %s"
+            cursor.execute(sql,(idgroup))
+            result = cursor.fetchall()
+            totalSizeCurrent = float (result[0]['totalSize'])
+
+            totalSizeNew = totalSizeCurrent - float (itemSize)
+            if totalSizeNew  < 0:
+                totalSizeNew = 0
+
+            totalSizeNew = str (totalSizeNew)
+            totalSizeNew =  totalSizeNew[0:4]
+
+            sql = "UPDATE groups " \
+                  "SET totalSize = %s " \
+                  "WHERE idgroup = %s"
+            cursor.execute(sql,(totalSizeNew, idgroup))
+
+        connection.commit()
+    finally:
+        connection.close()
