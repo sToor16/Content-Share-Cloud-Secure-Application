@@ -10,10 +10,12 @@
         <h3>Group Owner</h3>
         {{ groupData[0]['owner'] }}<br>
 
-        <form method="post" action="/uploadNewFile">
-            <input hidden name="idgroup" value="{{ groupData[0]['idgroup'] }}">
-            <input type="submit" class="w3-button w3-green" value="New Upload">
-        </form>
+        {% if session['isActive'] != 'true' %}
+            <form method="post" action="/uploadNewFile">
+                <input hidden name="idgroup" value="{{ groupData[0]['idgroup'] }}">
+                <input type="submit" class="w3-button w3-green" value="New Upload">
+            </form>
+        {% endif %}
 
         <div>
             {% for i in range(groupData|length) %}

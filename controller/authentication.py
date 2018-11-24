@@ -9,7 +9,6 @@ authentication = Blueprint('authentication', __name__, template_folder='template
 @authentication.route('/')
 @authentication.route('/login', methods=['GET', 'POST'])
 def login():
-
     if request.method == 'POST':
         user_id = request.form['user_id']
         password = request.form['password']

@@ -26,8 +26,13 @@
                                 {{ groups[i]['owner'] }}
                             </td>
                             <td width="33.33%">
+                                <form method="post" action="/selectedGroup">
+                                    <button name="idgroup" type="submit" value="{{ groups[i]['idgroup'] }}" class="w3-btn w3-green w3-center">
+                                        Open Group
+                                    </button>
+                                </form>
                                 <form method="post" action="/admin/deleteGroup">
-                                    <button name="deleteGroupID" type="submit" value="{{ groups[i]['idgroup'] }}" class="w3-btn w3-green w3-center">
+                                    <button name="deleteGroupID" type="submit" value="{{ groups[i]['idgroup'] }}" class="w3-btn w3-red w3-center">
                                         Delete Group
                                     </button>
                                 </form>

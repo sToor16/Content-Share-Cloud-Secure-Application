@@ -29,14 +29,13 @@ def adminGroups():
         return "NO ACCESS SORRY"
 
 @adminGroup.route('/admin/deleteGroup', methods = ['GET', 'POST'])
-def deactivateGroup():
+def deleteGroup():
     idgroup = request.form['deleteGroupID']
     try:
         connection = establishConnection()
         with connection.cursor() as cursor:
             sql = "DELETE FROM groups WHERE idgroup=%s"
             cursor.execute(sql, (idgroup))
-            result = cursor.fetchall()
             connection.commit()
     finally:
         connection.close()
