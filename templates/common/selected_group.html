@@ -33,7 +33,7 @@
                         <input hidden name="idgroup_items" value="{{ groupData[i]['idgroup_items'] }}">
                     </form>
 
-                    <a href="http://storage.googleapis.com/secure-flask-app-bucket/Itinerary_ Delhi.pdf_20January00_11212018" onclick="downloadFile()" class="w3-button w3-green">
+                    <a href="{{ groupData[i]['file_url'] }}" onclick="downloadFile()" class="w3-button w3-green">
                         Download
                     </a>
 

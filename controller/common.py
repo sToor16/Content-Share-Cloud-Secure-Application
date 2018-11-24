@@ -195,14 +195,7 @@ def downloadFile():
     time = now.time()
     date = now.date()
 
-    bucket_name = 'secure-flask-app-bucket'
-
-    source_blob_name =  'Itinerary_ Delhi.pdf_20January00_11212018'
-    destination_file_name = source_blob_name
-
     try:
-
-        # download_blob(bucket_name, source_blob_name, destination_file_name)
         connection = establishConnection()
         with connection.cursor() as cursor:
             sql = "UPDATE group_items SET " \
