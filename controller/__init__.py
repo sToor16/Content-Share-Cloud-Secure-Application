@@ -15,8 +15,10 @@ from controller.common import common
 from controller.adminUser import adminUser
 from controller.admingroup import adminGroup
 from controller.nonAdmin import nonAdmin
+from controller.authentication import authentication
 
 app.register_blueprint(common)
 app.register_blueprint(adminUser)
 app.register_blueprint(adminGroup)
 app.register_blueprint(nonAdmin)
+app.register_blueprint(authentication)
