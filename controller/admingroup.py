@@ -1,26 +1,9 @@
 from flask import Blueprint, render_template, session, redirect, request
 from controller.externalAccess import establishConnection
 
-admin = Blueprint('admin', __name__, template_folder='templates')
+adminGroup = Blueprint('adminGroup', __name__, template_folder='templates')
 
-@admin.route('/admin/users')
-def adminUsers():
-    if 'isAdmin' in session:
-        try:
-            connection = establishConnection()
-            with connection.cursor() as cursor:
-                isAdmin = 0;
-                sql = "SELECT userID, name, isActive FROM `Users` WHERE isAdmin=%s"
-
-                cursor.execute(sql, (isAdmin))
-                result = cursor.fetchall()
-        finally:
-            connection.close()
-        return render_template('admin/users.html', users = result);
-    else:
-        return "NO ACCESS SORRY"
-
-@admin.route('/admin/groups')
+@adminGroup.route('/admin/groups')
 def adminGroups():
     if 'isAdmin' in session:
         try:
@@ -45,35 +28,7 @@ def adminGroups():
     else:
         return "NO ACCESS SORRY"
 
-@admin.route('/admin/deleteUser', methods = ['GET','POST'])
-def deactivateUser():
-    user_id = request.form['deleteUserID']
-    try:
-        connection = establishConnection()
-        with connection.cursor() as cursor:
-            sql = "DELETE FROM Users WHERE userID=%s"
-            cursor.execute(sql, (user_id))
-            result = cursor.fetchall()
-            connection.commit()
-    finally:
-        connection.close()
-    return redirect('/admin/users')
-
-@admin.route('/admin/activateUser', methods = ['GET','POST'])
-def activateUser():
-    user_id = request.form['activateUserID']
-    try:
-        connection = establishConnection()
-        with connection.cursor() as cursor:
-            sql = "UPDATE `Users` SET isActive = '%s' WHERE userID=%s"
-            cursor.execute(sql, (1,user_id))
-            result = cursor.fetchall()
-            connection.commit()
-    finally:
-        connection.close()
-    return redirect('/admin/users')
-
-@admin.route('/admin/deleteGroup', methods = ['GET', 'POST'])
+@adminGroup.route('/admin/deleteGroup', methods = ['GET', 'POST'])
 def deactivateGroup():
     idgroup = request.form['deleteGroupID']
     try:
@@ -88,8 +43,7 @@ def deactivateGroup():
 
     return redirect('/admin/groups')
 
-
-@admin.route('/admin/activateGroup', methods=['GET', 'POST'])
+@adminGroup.route('/admin/activateGroup', methods=['GET', 'POST'])
 def activateGroup():
     idgroup = request.form['activateGroupID']
     groupOwner = request.form['groupOwner']
@@ -111,7 +65,7 @@ def activateGroup():
         connection.close()
     return redirect('/admin/groups')
 
-@admin.route('/admin/acceptGroupJoin', methods=['GET','POST'])
+@adminGroup.route('/admin/acceptGroupJoin', methods=['GET','POST'])
 def acceptGroupJoin():
     idRequest = request.form['requestID']
 
