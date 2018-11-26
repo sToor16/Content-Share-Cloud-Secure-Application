@@ -463,6 +463,7 @@ $.fn.ajaxSubmit = function(options) {
         var SERVER_ABORT = 2;
 
         function getDoc(frame) {
+
             /* it looks like contentWindow or contentDocument do not
              * carry the protocol property in ie8, when running under ssl
              * frame.document is the only valid response document, since
