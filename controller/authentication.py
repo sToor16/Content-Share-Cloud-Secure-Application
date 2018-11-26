@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, session, redirect, request, flash
 from controller.externalAccess import establishConnection
-from controller.validation import lengthValidation, zeroLengthCheck, passwordRegEx
+from controller.validation import lengthValidation, zeroLengthCheck, passwordRegEx, \
+    internationLettersRegEx, englishAlphabetsRegEx
 
 from controller import bcrypt
 
@@ -56,33 +57,40 @@ def register():
         params['user_id'] = request.form['user_id']
         params['password'] = request.form['password']
 
-        if checkLengthOfParams(params):
+        if validation(params):
             if checkIdAvailable(params['user_id']):
                 flash("User is already exists")
             else:
                 addUser(params)
-
+        else:
+            return render_template('common/register.html')
     return render_template('common/register.html')
 
-def checkLengthOfParams(params):
+def validation(params):
     if zeroLengthCheck(params['userName']):
         flash("Please enter your name")
-        return render_template('common/register.html')
+        return 0
+    # elif internationLettersRegEx(params['userName']):
+    #     flash("Name shoud only have alphabets from international languages and nothing else")
+    #     return 0
     elif lengthValidation(params['userName'], 80):
         flash("name to long")
-        return render_template('common/register.html')
+        return 0
 
     if zeroLengthCheck(params['user_id']):
         flash("Please enter userid")
-        return render_template('common/register.html')
+        return 0
+    elif englishAlphabetsRegEx(params['user_id']):
+        flash("Only english alphabets allowed in user id")
+        return 0
     elif lengthValidation(params['user_id'],16):
         flash("user id too long")
-        return render_template('common/register.html')
+        return 0
 
     if passwordRegEx(params['password']):
         flash("Password must contain Uppercase, lowercase, digit and special "
               "character and should be atleast 8 characters long")
-        return render_template('common/register.html')
+        return 0
     return 1
 
 def checkIdAvailable(userId):
