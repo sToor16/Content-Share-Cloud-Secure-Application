@@ -1,8 +1,8 @@
 from flask import Blueprint, render_template, session, redirect, request, flash
 from controller.externalAccess import establishConnection
+from controller.validation import lengthValidation, zeroLengthCheck, passwordRegEx
 
 from controller import bcrypt
-import re
 
 authentication = Blueprint('authentication', __name__, template_folder='templates')
 
@@ -56,11 +56,8 @@ def register():
         params['user_id'] = request.form['user_id']
         params['password'] = request.form['password']
 
-        flag = checkLengthOfParams(params)
-        if flag == 1:
-            exists = checkIdAvailable(params['user_id'])
-
-            if exists == 1:
+        if checkLengthOfParams(params):
+            if checkIdAvailable(params['user_id']):
                 flash("User is already exists")
             else:
                 addUser(params)
@@ -68,28 +65,27 @@ def register():
     return render_template('common/register.html')
 
 def checkLengthOfParams(params):
-    if len(params['userName']) == 0:
-        flash("Please enter username")
+    if zeroLengthCheck(params['userName']):
+        flash("Please enter your name")
         return render_template('common/register.html')
-    elif len(params['userName']) > 80:
-        flash("Username to long")
+    elif lengthValidation(params['userName'], 80):
+        flash("name to long")
         return render_template('common/register.html')
 
-    if len(params['user_id']) == 0:
+    if zeroLengthCheck(params['user_id']):
         flash("Please enter userid")
         return render_template('common/register.html')
-    elif len(params['user_id']) > 16:
+    elif lengthValidation(params['user_id'],16):
         flash("user id too long")
         return render_template('common/register.html')
 
-    if not re.match(r'[A-Za-z0-9@#$%^&+=]{8,}', params['password']):
+    if passwordRegEx(params['password']):
         flash("Password must contain Uppercase, lowercase, digit and special "
               "character and should be atleast 8 characters long")
         return render_template('common/register.html')
     return 1
 
 def checkIdAvailable(userId):
-    exists = 0
     connection = establishConnection()
     try:
         with connection.cursor() as cursor:
@@ -99,12 +95,11 @@ def checkIdAvailable(userId):
             result = cursor.fetchall()
             count = result[0]['COUNT(*)']
             if count == 1:
-                exists = 1
-        connection.commit()
+                return 1
     finally:
         connection.close()
 
-    return exists
+    return 0
 
 def addUser(params):
     hashedPw = bcrypt.generate_password_hash(params['password'])
