@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, session, redirect, request, flash
 from controller.externalAccess import establishConnection
-from controller.validation import lengthValidation, zeroLengthCheck, passwordRegEx, \
-    internationLettersRegEx, englishAlphabetsRegEx
+from controller.security import lengthValidation, zeroLengthCheck, passwordRegEx, \
+    internationLettersRegEx, englishAlphabetsRegEx, menInSuits
 
 from controller import bcrypt
 
@@ -10,44 +10,68 @@ authentication = Blueprint('authentication', __name__, template_folder='template
 @authentication.route('/')
 @authentication.route('/login', methods=['GET', 'POST'])
 def login():
+
+    params = {}
     if request.method == 'POST':
-        user_id = request.form['user_id']
-        password = request.form['password']
+        params['user_id'] = request.form['user_id']
+        params['password'] = request.form['password']
 
-        try:
-            connection = establishConnection()
+        if secureLogin(params):
+            try:
+                connection = establishConnection()
 
-            with connection.cursor() as cursor:
-                sql = "SELECT * FROM `Users` WHERE userID=%s"
-                cursor.execute(sql, (user_id))
-                result = cursor.fetchall()
-                if (len(result) == 0):
-                    flash("userid does not exist")
-                    return render_template('common/login.html')
-                else:
-                    hasPw = result[0]['password']
-                    if bcrypt.check_password_hash(hasPw, password):
-                        if result[0]['isActive'] == 1:
-                            session['userID'] = user_id
-                            session['isActive'] = 'true'
-                            session['name'] = result[0]['name']
-                            if result[0]['isAdmin'] == 1:
-                                session['isAdmin'] = 'true'
-                                return redirect('/admin/users')
-                            else:
-                                return redirect('groups')
-                        else:
-                            flash("You are not yet activated by Admin")
-                            return render_template('common/login.html')
-                    else:
-                        flash("wrong credentials")
+                with connection.cursor() as cursor:
+                    sql = "SELECT * FROM `Users` WHERE userID=%s"
+                    cursor.execute(sql, (params['user_id']))
+                    result = cursor.fetchall()
+                    if (len(result) == 0):
+                        flash("userid does not exist")
                         return render_template('common/login.html')
-        finally:
-            connection.close()
+                    else:
+                        hasPw = result[0]['password']
+                        if bcrypt.check_password_hash(hasPw, params['password']):
+                            if result[0]['isActive'] == 1:
+                                session['userID'] = params['user_id']
+                                session['isActive'] = 'true'
+                                session['name'] = result[0]['name']
+                                if result[0]['isAdmin'] == 1:
+                                    session['isAdmin'] = 'true'
+                                    return redirect('/admin/users')
+                                else:
+                                    return redirect('groups')
+                            else:
+                                flash("You are not yet activated by Admin")
+                                return render_template('common/login.html')
+                        else:
+                            flash("wrong credentials")
+                            return render_template('common/login.html')
+            finally:
+                connection.close()
 
     return render_template('common/login.html', title='login');
 
+def secureLogin(params):
+    if zeroLengthCheck(params['user_id']):
+        flash("Please enter user id")
+        return 0
+    if englishAlphabetsRegEx(params['user_id']):
+        flash("Please enter user id in english alphabets only, anything else not allowed")
+        return 0
+    if lengthValidation(params['user_id'],16):
+        menInSuits()
+        return 0
+    if zeroLengthCheck(params['password']):
+        flash("Please enter password")
+        return 0
+    if passwordRegEx(params['password']):
+        flash("Password must contain Uppercase, lowercase, digit and special "
+              "character and should be atleast 8 characters long")
+        return 0
+    return 1
+
+
 @authentication.route('/register', methods=["GET","POST"])
+
 def register():
 
     params = {}
@@ -57,7 +81,7 @@ def register():
         params['user_id'] = request.form['user_id']
         params['password'] = request.form['password']
 
-        if validation(params):
+        if secureRegistration(params):
             if checkIdAvailable(params['user_id']):
                 flash("User is already exists")
             else:
@@ -66,13 +90,13 @@ def register():
             return render_template('common/register.html')
     return render_template('common/register.html')
 
-def validation(params):
+def secureRegistration(params):
     if zeroLengthCheck(params['userName']):
         flash("Please enter your name")
         return 0
-    # elif internationLettersRegEx(params['userName']):
-    #     flash("Name shoud only have alphabets from international languages and nothing else")
-    #     return 0
+    if englishAlphabetsRegEx(params['userName']):
+        flash("Name shoud only have alphabets from engile and nothing else")
+        return 0
     elif lengthValidation(params['userName'], 80):
         flash("name to long")
         return 0

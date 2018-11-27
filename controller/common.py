@@ -46,11 +46,10 @@ def uploadFile():
     now = datetime.datetime.now()
     time = now.time()
     date = now.date()
-    params['date'] = date.strftime('%m%d%Y')
-    params['time'] = time.strftime('%H%B')
+    params['date'] = date.strftime('%m-%d-%Y')
+    params['time'] = time.strftime('%k:%M:%S')
 
     file = request.files['file']
-
     params['fileName'] = params['date'] + '_' + params['time'] + '_' + file.filename
     createTempFile(file, params['fileName'])
 

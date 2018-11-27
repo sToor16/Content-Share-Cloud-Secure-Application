@@ -4,15 +4,15 @@
     </head>
     <body>
         {% include 'common/navigationBar.html' %}<br><br>
-        <div>
+        <div class="w3-center w3-grey">
             <h3><span>Create New</span></h3>
             <form method="post" action="/createGroup">
-                <input type="text" name="name" placeholder="Group Name"><br>
+                <input type="text" name="name" placeholder="Group Name"><br><br>
                 <input type="submit" class="w3-button w3-green">
             </form>
         </div>
         <div>
-            <h3><span>joined Groups</span></h3>
+            <h3 class="w3-center"><span>joined Groups</span></h3>
             <table class="w3-centered w3-striped w3-table w3-border w3-bordered">
                 <tr>
                     <th width="33.33%">
@@ -43,7 +43,7 @@
             </table>
         </div>
         <div>
-            <h3><span>Unjoined Groups</span></h3>
+            <h3 class="w3-center"><span>Unjoined Groups</span></h3>
             <table class="w3-centered w3-striped w3-table w3-border w3-bordered">
                 <tr>
                     <th width="33.33%">

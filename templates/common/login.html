@@ -4,12 +4,12 @@
     </head>
     <body>
         {% include 'common/navigationBar.html' %}<br><br>
-        <h1>Make a function that verifies input with regex and uses this over and over again.<br>
-            Also use this when we are getting id's from request.form
-        </h1>
-        <h3>
-            Handle login logout/ nav bar flow
-        </h3>
+{#        <h1>Make a function that verifies input with regex and uses this over and over again.<br>#}
+{#            Also use this when we are getting id's from request.form#}
+{#        </h1>#}
+{#        <h3>#}
+{#            Handle login logout/ nav bar flow#}
+{#        </h3>#}
 
         {% with messages = get_flashed_messages() %}
             {% if messages %}
@@ -22,8 +22,8 @@
         {% endwith %}
 
         <form action="/login" method="post">
-            <input value="toor16" name="user_id" type="text" placeholder="user ID"><br>
-            <input value="1234" name="password" type="password" placeholder="password"><br>
+            <input value="toorAdmin" name="user_id" type="text" placeholder="user ID"><br>
+            <input value="Password1!" name="password" type="password" placeholder="password"><br>
 
             <input type = "submit" value = "submit" />
         </form>
